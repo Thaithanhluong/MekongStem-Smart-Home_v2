@@ -28,7 +28,6 @@ async def on_mqtt_msg_f_k_q_l(topic, msg):
     rgb_led_D9.show(0, hex_to_rgb(color))
   else:
     rgb_led_D9.show(0, hex_to_rgb('#000000'))
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/led-rgb', last_LED_state)
 
 async def on_mqtt_msg_J_V_x_E(topic, msg):
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
@@ -37,6 +36,24 @@ async def on_mqtt_msg_J_V_x_E(topic, msg):
     rgb_led_D9.show(0, hex_to_rgb(color))
 
 cfg = config.copy()
+MQTT_USER = 'luong873004'
+MQTT_FEED_PREFIX = MQTT_USER + '/feeds/'
+TOPIC_LIGHT_STATE = MQTT_FEED_PREFIX + 'V1'
+TOPIC_RGB_COLOR = MQTT_FEED_PREFIX + 'V2'
+TOPIC_RGB_STATE = MQTT_FEED_PREFIX + 'V3'
+TOPIC_TEMPERATURE = MQTT_FEED_PREFIX + 'V4'
+TOPIC_HUMIDITY = MQTT_FEED_PREFIX + 'V5'
+TOPIC_LIGHT_SENSOR = MQTT_FEED_PREFIX + 'V6'
+TOPIC_GAS = MQTT_FEED_PREFIX + 'V7'
+TOPIC_MOTION = MQTT_FEED_PREFIX + 'V8'
+TOPIC_FAN_STATE = MQTT_FEED_PREFIX + 'V9'
+TOPIC_FAN_SPEED = MQTT_FEED_PREFIX + 'V10'
+TOPIC_AUTO_LIGHT = MQTT_FEED_PREFIX + 'V11'
+TOPIC_BUZZER_DETECT = MQTT_FEED_PREFIX + 'V12'
+TOPIC_MAIN_DOOR = MQTT_FEED_PREFIX + 'V13'
+TOPIC_RFID_DOOR = MQTT_FEED_PREFIX + 'V14'
+TOPIC_DEVICE = MQTT_FEED_PREFIX + 'V15'
+TOPIC_BUZZER = MQTT_FEED_PREFIX + 'V16'
 
 # Mô tả hàm này...
 async def K_E1_BA_BFt_n_E1_BB_91i_Wifi():
@@ -70,7 +87,6 @@ async def on_mqtt_msg_c_A_i_o(topic, msg):
     minifan_D4.write_analog(round(translate(speed, 0, 100, 0, 1023)))
   else:
     minifan_D4.write_analog(round(translate(0, 0, 100, 0, 1023)))
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/fan', last_fan_state)
 
 async def on_mqtt_msg_y_z_p_e(topic, msg):
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
@@ -85,7 +101,6 @@ async def on_mqtt_msg_O_N_P_T(topic, msg):
     usb_switch_D3.write_analog(round(translate(100, 0, 100, 0, 1023)))
   else:
     usb_switch_D3.write_analog(round(translate(0, 0, 100, 0, 1023)))
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/light', light)
 
 # Mô tả hàm này...
 async def Hi_E1_BB_83n_th_E1_BB_8B_ban__C4_91_E1_BA_A7u():
@@ -98,22 +113,21 @@ async def Hi_E1_BB_83n_th_E1_BB_8B_ban__C4_91_E1_BA_A7u():
   oled.text(str((''.join([str(x6) for x6 in ['Do am: ', _C4_90_E1_BB_99__E1_BA_A9m, '%']]))), 1-1, 15-1, 1); oled.show()
   oled.text(str((''.join([str(x7) for x7 in ['Anh sang:', _C3_81nh_s_C3_A1ng, '%']]))), 1-1, 30-1, 1); oled.show()
   oled.text(str((''.join([str(x8) for x8 in ['Khi gas:', khi_gas, 'ppm']]))), 1-1, 45-1, 1); oled.show()
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/sensor/light', _C3_81nh_s_C3_A1ng)
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/sensor/temperature', Nhi_E1_BB_87t__C4_91_E1_BB_99)
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/sensor/humidity', _C4_90_E1_BB_99__E1_BA_A9m)
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/sensor/gas', khi_gas)
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/led-rgb', last_LED_state)
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/fan', last_fan_state)
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/light', light)
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/buzzer/detect', buzzer_when_detect)
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/door/main', C_E1_BB_ADa)
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/door/rfid', RFID)
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/light/auto', AUTO_LIGHT)
+  await mqtt_client.publish(TOPIC_LIGHT_SENSOR, _C3_81nh_s_C3_A1ng)
+  await mqtt_client.publish(TOPIC_TEMPERATURE, Nhi_E1_BB_87t__C4_91_E1_BB_99)
+  await mqtt_client.publish(TOPIC_HUMIDITY, _C4_90_E1_BB_99__E1_BA_A9m)
+  await mqtt_client.publish(TOPIC_GAS, khi_gas)
+  await mqtt_client.publish(TOPIC_RGB_STATE, last_LED_state)
+  await mqtt_client.publish(TOPIC_FAN_STATE, last_fan_state)
+  await mqtt_client.publish(TOPIC_LIGHT_STATE, light)
+  await mqtt_client.publish(TOPIC_BUZZER_DETECT, buzzer_when_detect)
+  await mqtt_client.publish(TOPIC_MAIN_DOOR, C_E1_BB_ADa)
+  await mqtt_client.publish(TOPIC_RFID_DOOR, RFID)
+  await mqtt_client.publish(TOPIC_AUTO_LIGHT, AUTO_LIGHT)
 
 async def on_mqtt_msg_V_d_z_u(topic, msg):
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   AUTO_LIGHT = msg
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/light/auto', AUTO_LIGHT)
 
 async def on_mqtt_msg_R_Y_z_G(topic, msg):
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
@@ -122,7 +136,13 @@ async def on_mqtt_msg_R_Y_z_G(topic, msg):
     buzzer_when_detect = '1'
   else:
     buzzer_when_detect = '0'
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/buzzer/detect', buzzer_when_detect)
+
+async def on_mqtt_msg_buzzer_manual(topic, msg):
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  if msg == '1':
+    buzzer_D7.write_analog(round(translate(70, 0, 100, 0, 1023)))
+  else:
+    buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
 
 async def on_mqtt_msg_X_v_h_D(topic, msg):
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
@@ -137,19 +157,17 @@ async def on_mqtt_msg_X_v_h_D(topic, msg):
     buzzer_D7.write_analog(round(translate(70, 0, 100, 0, 1023)))
     await asleep_ms(100)
     buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/door/main', C_E1_BB_ADa)
 
 async def on_mqtt_msg_k_x_E_F(topic, msg):
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   ARE_U_HERE = msg
   if ARE_U_HERE == 'ARE U HERE':
-    await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/device', 'HERE')
+    await mqtt_client.publish(TOPIC_DEVICE, 'HERE')
     print('HERE', end =' ')
 
 async def on_mqtt_msg_r_E_x_W(topic, msg):
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   RFID = msg
-  await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/door/rfid', RFID)
   print(RFID)
 
 khi_gas = None
@@ -173,28 +191,29 @@ oled = SSD1306_I2C()
 servo_D2 = Pins(D2_PIN)
 buzzer_D7 = Pins(D7_PIN)
 rgb_led_D9 = RGBLed(D9_PIN, 4)
-cfg['topics'].append(('mekongstem/smart-home/esp32s3-luong872/cmd/led-rgb/state', on_mqtt_msg_f_k_q_l))
-cfg['topics'].append(('mekongstem/smart-home/esp32s3-luong872/cmd/led-rgb/color', on_mqtt_msg_J_V_x_E))
+cfg['topics'].append((TOPIC_RGB_STATE, on_mqtt_msg_f_k_q_l))
+cfg['topics'].append((TOPIC_RGB_COLOR, on_mqtt_msg_J_V_x_E))
 cfg['ssid'] = 'BNG Tech'
 cfg['wifi_pw'] = 'bng@2025'
-cfg['server'] = 'broker.emqx.io'
+cfg['server'] = 'mqtt.ohstem.vn'
 cfg['port'] = 1883
-cfg['user'] = ''
-cfg['password'] = ''
+cfg['user'] = MQTT_USER
+cfg['password'] = 'mekongstem@2025'
 
 dht20 = DHT20()
 minifan_D4 = Pins(D4_PIN)
-cfg['topics'].append(('mekongstem/smart-home/esp32s3-luong872/cmd/fan/state', on_mqtt_msg_c_A_i_o))
+cfg['topics'].append((TOPIC_FAN_STATE, on_mqtt_msg_c_A_i_o))
 pir_D5 = Pins(D5_PIN)
-cfg['topics'].append(('mekongstem/smart-home/esp32s3-luong872/cmd/fan/speed', on_mqtt_msg_y_z_p_e))
+cfg['topics'].append((TOPIC_FAN_SPEED, on_mqtt_msg_y_z_p_e))
 usb_switch_D3 = Pins(D3_PIN)
-cfg['topics'].append(('mekongstem/smart-home/esp32s3-luong872/cmd/light/state', on_mqtt_msg_O_N_P_T))
+cfg['topics'].append((TOPIC_LIGHT_STATE, on_mqtt_msg_O_N_P_T))
 light_A0 = Pins(A0_PIN)
-cfg['topics'].append(('mekongstem/smart-home/esp32s3-luong872/cmd/light/auto', on_mqtt_msg_V_d_z_u))
-cfg['topics'].append(('mekongstem/smart-home/esp32s3-luong872/cmd/buzzer/detect', on_mqtt_msg_R_Y_z_G))
-cfg['topics'].append(('mekongstem/smart-home/esp32s3-luong872/cmd/door/main', on_mqtt_msg_X_v_h_D))
-cfg['topics'].append(('mekongstem/smart-home/esp32s3-luong872/cmd/device', on_mqtt_msg_k_x_E_F))
-cfg['topics'].append(('mekongstem/smart-home/esp32s3-luong872/cmd/door/rfid', on_mqtt_msg_r_E_x_W))
+cfg['topics'].append((TOPIC_AUTO_LIGHT, on_mqtt_msg_V_d_z_u))
+cfg['topics'].append((TOPIC_BUZZER_DETECT, on_mqtt_msg_R_Y_z_G))
+cfg['topics'].append((TOPIC_MAIN_DOOR, on_mqtt_msg_X_v_h_D))
+cfg['topics'].append((TOPIC_DEVICE, on_mqtt_msg_k_x_E_F))
+cfg['topics'].append((TOPIC_RFID_DOOR, on_mqtt_msg_r_E_x_W))
+cfg['topics'].append((TOPIC_BUZZER, on_mqtt_msg_buzzer_manual))
 
 def deinit():
   mqtt_client.close()
@@ -265,13 +284,13 @@ async def task_N_h_S_S():
     oled.text(str((''.join([str(x2) for x2 in ['Do am: ', _C4_90_E1_BB_99__E1_BA_A9m, '%']]))), 1-1, 15-1, 1); oled.show()
     oled.text(str((''.join([str(x3) for x3 in ['Anh sang:', _C3_81nh_s_C3_A1ng, '%']]))), 1-1, 30-1, 1); oled.show()
     oled.text(str((''.join([str(x4) for x4 in ['Khi gas:', khi_gas, 'ppm']]))), 1-1, 45-1, 1); oled.show()
-    await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/sensor/light', _C3_81nh_s_C3_A1ng)
+    await mqtt_client.publish(TOPIC_LIGHT_SENSOR, _C3_81nh_s_C3_A1ng)
     await asleep_ms(500)
-    await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/sensor/temperature', Nhi_E1_BB_87t__C4_91_E1_BB_99)
+    await mqtt_client.publish(TOPIC_TEMPERATURE, Nhi_E1_BB_87t__C4_91_E1_BB_99)
     await asleep_ms(500)
-    await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/sensor/humidity', _C4_90_E1_BB_99__E1_BA_A9m)
+    await mqtt_client.publish(TOPIC_HUMIDITY, _C4_90_E1_BB_99__E1_BA_A9m)
     await asleep_ms(500)
-    await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/sensor/gas', khi_gas)
+    await mqtt_client.publish(TOPIC_GAS, khi_gas)
 
 async def task_on_event_R_g_c_l():
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng, pir_motion_active
@@ -280,7 +299,7 @@ async def task_on_event_R_g_c_l():
     if (pir_D5.read_digital() == 1):
       if not pir_motion_active:
         pir_motion_active = True
-        await mqtt_client.publish('mekongstem/smart-home/esp32s3-luong872/state/motion', 'DETECTED')
+        await mqtt_client.publish(TOPIC_MOTION, 'DETECTED')
       if buzzer_when_detect == '1':
         buzzer_D7.write_analog(round(translate(70, 0, 100, 0, 1023)))
         await asleep_ms(300)

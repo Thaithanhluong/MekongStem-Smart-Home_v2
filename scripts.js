@@ -648,34 +648,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (!rgbCard || !rgbIcon || !rgbStatus || !colorButtons.length) return;
 
-  const mqttBaseTopic = 'mekongstem/smart-home/esp32s3-luong872';
+  const mqttBaseTopic = 'luong873004/feeds';
   const mqttConfig = {
-    url: 'wss://broker.emqx.io:8084/mqtt',
-    deviceCmdTopic: `${mqttBaseTopic}/cmd/device`,
-    rgbStateTopic: `${mqttBaseTopic}/cmd/led-rgb/state`,
-    rgbColorTopic: `${mqttBaseTopic}/cmd/led-rgb/color`,
-    fanStateTopic: `${mqttBaseTopic}/cmd/fan/state`,
-    fanSpeedTopic: `${mqttBaseTopic}/cmd/fan/speed`,
-    buzzerStateTopic: `${mqttBaseTopic}/cmd/buzzer/state`,
-    buzzerDetectStateTopic: `${mqttBaseTopic}/cmd/buzzer/detect`,
-    mainDoorStateTopic: `${mqttBaseTopic}/cmd/door/main`,
-    autoDoorStateTopic: `${mqttBaseTopic}/cmd/door/rfid`,
-    lightStateTopic: `${mqttBaseTopic}/cmd/light/state`,
-    autoLightTopic: `${mqttBaseTopic}/cmd/light/auto`,
-    deviceStateTopic: `${mqttBaseTopic}/state/device`,
-    motionTopic: `${mqttBaseTopic}/state/motion`,
-    rgbStatusTopic: `${mqttBaseTopic}/state/led-rgb`,
-    fanStatusTopic: `${mqttBaseTopic}/state/fan`,
-    buzzerStatusTopic: `${mqttBaseTopic}/state/buzzer`,
-    buzzerDetectStatusTopic: `${mqttBaseTopic}/state/buzzer/detect`,
-    mainDoorStatusTopic: `${mqttBaseTopic}/state/door/main`,
-    autoDoorStatusTopic: `${mqttBaseTopic}/state/door/rfid`,
-    lightStatusTopic: `${mqttBaseTopic}/state/light`,
-    autoLightStatusTopic: `${mqttBaseTopic}/state/light/auto`,
-    gasTopic: `${mqttBaseTopic}/sensor/gas`,
-    humidityTopic: `${mqttBaseTopic}/sensor/humidity`,
-    temperatureTopic: `${mqttBaseTopic}/sensor/temperature`,
-    lightTopic: `${mqttBaseTopic}/sensor/light`,
+    url: 'ws://mqtt.ohstem.vn:8083/mqtt',
+    username: 'luong873004',
+    password: 'mekongstem@2025',
+    lightStateTopic: `${mqttBaseTopic}/V1`,
+    rgbColorTopic: `${mqttBaseTopic}/V2`,
+    rgbStateTopic: `${mqttBaseTopic}/V3`,
+    temperatureTopic: `${mqttBaseTopic}/V4`,
+    humidityTopic: `${mqttBaseTopic}/V5`,
+    lightTopic: `${mqttBaseTopic}/V6`,
+    gasTopic: `${mqttBaseTopic}/V7`,
+    motionTopic: `${mqttBaseTopic}/V8`,
+    fanStateTopic: `${mqttBaseTopic}/V9`,
+    fanSpeedTopic: `${mqttBaseTopic}/V10`,
+    autoLightTopic: `${mqttBaseTopic}/V11`,
+    buzzerDetectStateTopic: `${mqttBaseTopic}/V12`,
+    mainDoorStateTopic: `${mqttBaseTopic}/V13`,
+    autoDoorStateTopic: `${mqttBaseTopic}/V14`,
+    deviceCmdTopic: `${mqttBaseTopic}/V15`,
+    deviceStateTopic: `${mqttBaseTopic}/V15`,
+    buzzerStateTopic: `${mqttBaseTopic}/V16`,
+    lightStatusTopic: `${mqttBaseTopic}/V1`,
+    rgbStatusTopic: `${mqttBaseTopic}/V3`,
+    fanStatusTopic: `${mqttBaseTopic}/V9`,
+    buzzerStatusTopic: `${mqttBaseTopic}/V16`,
+    buzzerDetectStatusTopic: `${mqttBaseTopic}/V12`,
+    mainDoorStatusTopic: `${mqttBaseTopic}/V13`,
+    autoDoorStatusTopic: `${mqttBaseTopic}/V14`,
+    autoLightStatusTopic: `${mqttBaseTopic}/V11`,
   };
   const dashboardStateUrl = window.__DASHBOARD_STATE_URL__ || '';
   const espHandshakeConfig = {
@@ -805,6 +807,8 @@ document.addEventListener('DOMContentLoaded', function() {
     mqttConfig.humidityTopic,
     mqttConfig.temperatureTopic,
     mqttConfig.lightTopic,
+    mqttConfig.rgbColorTopic,
+    mqttConfig.fanSpeedTopic,
     mqttConfig.rgbStatusTopic,
     mqttConfig.fanStatusTopic,
     mqttConfig.buzzerStatusTopic,
@@ -813,7 +817,7 @@ document.addEventListener('DOMContentLoaded', function() {
     mqttConfig.autoDoorStatusTopic,
     mqttConfig.lightStatusTopic,
     mqttConfig.autoLightStatusTopic,
-  ];
+  ].filter((topic, index, topics) => topics.indexOf(topic) === index);
 
   const readBinaryState = (message) => {
     const normalized = String(message || '').trim().toUpperCase();
@@ -851,6 +855,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
+  const applyFanSpeedMessage = (message) => {
+    if (!fanSpeedSlider) return;
+
+    const speed = Number.parseInt(String(message || '').trim(), 10);
+    if (!Number.isFinite(speed)) return;
+
+    const normalizedSpeed = Math.min(100, Math.max(0, speed));
+    fanSpeedSlider.value = String(normalizedSpeed);
+    if (fanSpeedValue) {
+      fanSpeedValue.textContent = `${normalizedSpeed}%`;
+    }
+    updateFanUi(fanToggle ? fanToggle.checked : true);
+  };
+
   const persistControlState = (patch) => {
     if (isDashboardHydrating) return;
     writeDashboardState({ controls: patch });
@@ -879,6 +897,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     mqttClient = mqtt.connect(mqttConfig.url, {
       clientId: `mekongstem_web_${Math.random().toString(16).slice(2, 10)}`,
+      username: mqttConfig.username,
+      password: mqttConfig.password,
       clean: true,
       connectTimeout: 5000,
       reconnectPeriod: 2000,
@@ -936,6 +956,10 @@ document.addEventListener('DOMContentLoaded', function() {
         updateTemperature(message);
       } else if (topic === mqttConfig.lightTopic) {
         updateLight(message);
+      } else if (topic === mqttConfig.rgbColorTopic) {
+        setRgbColorByValue(message, false);
+      } else if (topic === mqttConfig.fanSpeedTopic) {
+        applyFanSpeedMessage(message);
       } else {
         applyControlStateMessage(topic, message);
       }
@@ -1282,8 +1306,6 @@ document.addEventListener('DOMContentLoaded', function() {
     armLightSchedule();
     closeLightSettings();
   };
-
-  connectMqtt();
 
   const formatCurrentTime = () => {
     return new Date().toLocaleTimeString('vi-VN', {
@@ -2290,6 +2312,8 @@ document.addEventListener('DOMContentLoaded', function() {
   if (initialSelected) {
     setRgbColor(initialSelected, false);
   }
+
+  connectMqtt();
 });
 
 document.addEventListener('DOMContentLoaded', function() {
