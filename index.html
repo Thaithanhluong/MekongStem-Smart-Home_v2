@@ -1,0 +1,441 @@
+﻿<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mekong Stem Smart Home Dashboard</title>
+<link href="favicon.ico" rel="icon" type="image/x-icon"/>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="scripts.js"></script>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Font Awesome for Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
+<link href="styles.css" rel="stylesheet"/>
+</head>
+<body class="font-sans text-slate-800 bg-[#f6f9fe]">
+<div class="flex h-screen overflow-hidden">
+<!-- BEGIN: Main Content Area -->
+<main class="flex-1 flex flex-col overflow-y-auto bg-[#f6f9fe] relative">
+<!-- Header -->
+<header class="sticky top-0 z-10 bg-[#f6f9fe]/85 backdrop-blur-md px-8 py-4 flex flex-wrap justify-between items-center gap-4 border-b border-[#dbe6f5]" data-purpose="main-header">
+<div class="flex items-center gap-3 min-w-0">
+<img alt="MEKONG STEM Logo" class="h-12 w-auto object-contain" src="logo.png"/>
+<h1 class="text-3xl font-bold text-mekong-blue">MEKONG STEM <span class="text-mekong-brown">SMART HOME</span></h1>
+</div>
+<div class="header-actions">
+<div class="header-user">
+<div class="header-user__avatar">
+<i class="fa-solid fa-user"></i>
+</div>
+<div class="min-w-0">
+<p class="header-user__name">Admin</p>
+<p class="header-user__email">admin@mekongstem.vn</p>
+</div>
+</div>
+<div class="header-connection">
+<i class="fa-solid fa-wifi"></i>
+<p>Kết nối: <span id="mqttConnectionStatus">Đang kết nối...</span></p>
+</div>
+<button class="help-trigger" type="button" aria-label="Mở hướng dẫn tổng quan" aria-controls="helpPopover" aria-expanded="false" data-help-key="header">
+<i class="fa-solid fa-circle-question"></i>
+</button>
+</div>
+</header>
+<!-- Dashboard Grid -->
+<div class="px-8 pb-12 space-y-6">
+<!-- BEGIN: Top Status Cards -->
+<div class="flex items-center justify-between">
+<h3 class="text-lg font-bold text-mekong-blue">CHỈ SỐ NHANH</h3>
+<button class="help-trigger" type="button" aria-label="Mở hướng dẫn chỉ số nhanh" aria-controls="helpPopover" aria-expanded="false" data-help-key="status">
+<i class="fa-solid fa-circle-question"></i>
+</button>
+</div>
+<div class="grid grid-cols-4 gap-4" data-purpose="top-status-cards">
+<!-- Temperature -->
+<div class="bg-white p-4 rounded-2xl card-shadow flex items-center gap-4">
+<div class="w-12 h-12 bg-mekong-light-blue text-mekong-blue rounded-full flex items-center justify-center text-xl">
+<i class="fa-solid fa-temperature-three-quarters"></i>
+</div>
+<div>
+<p class="text-xs text-slate-500">Nhiệt độ</p>
+<h4 class="text-xl font-bold" id="temperatureValue">28.6°C</h4>
+<p class="text-[10px] text-mekong-sky font-medium" id="temperatureStatus"><span class="inline-block w-1.5 h-1.5 rounded-full bg-mekong-sky mr-1"></span> Bình thường</p>
+</div>
+</div>
+<!-- Humidity -->
+<div class="bg-white p-4 rounded-2xl card-shadow flex items-center gap-4">
+<div class="w-12 h-12 bg-mekong-light-blue text-mekong-blue rounded-full flex items-center justify-center text-xl">
+<i class="fa-solid fa-droplet"></i>
+</div>
+<div>
+<p class="text-xs text-slate-500">Độ ẩm</p>
+<h4 class="text-xl font-bold" id="humidityValue">65%</h4>
+<p class="text-[10px] text-mekong-sky font-medium" id="humidityStatus"><span class="inline-block w-1.5 h-1.5 rounded-full bg-mekong-sky mr-1"></span> Bình thường</p>
+</div>
+</div>
+<!-- Light -->
+<div class="bg-white p-4 rounded-2xl card-shadow flex items-center gap-4">
+<div class="w-12 h-12 bg-mekong-brown/10 text-mekong-brown rounded-full flex items-center justify-center text-xl">
+<i class="fa-solid fa-sun"></i>
+</div>
+<div>
+<p class="text-xs text-slate-500">Ánh sáng</p>
+<h4 class="text-xl font-bold" id="lightValue">320 <span class="text-sm font-medium">lux</span></h4>
+<p class="text-[10px] text-mekong-sky font-medium" id="lightStatus"><span class="inline-block w-1.5 h-1.5 rounded-full bg-mekong-sky mr-1"></span> Trung bình</p>
+</div>
+</div>
+<!-- Gas -->
+<div class="bg-white p-4 rounded-2xl card-shadow flex items-center gap-4">
+<div class="w-12 h-12 bg-mekong-brown/10 text-mekong-brown rounded-full flex items-center justify-center text-xl">
+<i class="fa-solid fa-fire-flame-curved"></i>
+</div>
+<div>
+<p class="text-xs text-slate-500">Khí gas</p>
+<h4 class="text-xl font-bold" id="gasValue">120 <span class="text-sm font-medium">ppm</span></h4>
+<p class="text-[10px] text-mekong-sky font-medium" id="gasStatus"><span class="inline-block w-1.5 h-1.5 rounded-full bg-mekong-sky mr-1"></span> An toàn</p>
+</div>
+</div>
+</div>
+<!-- END: Top Status Cards -->
+<!-- BEGIN: Middle Row -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Living Room Controls -->
+<div class="col-span-8" data-purpose="living-room-controls">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold text-mekong-blue">PHÒNG KHÁCH</h3>
+<button class="help-trigger" type="button" aria-label="Mở hướng dẫn phòng khách" aria-controls="helpPopover" aria-expanded="false" data-help-key="living-room">
+<i class="fa-solid fa-circle-question"></i>
+</button>
+</div>
+<div class="grid grid-cols-3 gap-4">
+<!-- Light Toggle -->
+<div class="bg-white p-4 rounded-2xl card-shadow flex flex-col items-center justify-between gap-4 min-h-[12.75rem] relative" id="lightControlCard">
+<button class="light-settings-trigger absolute top-2 left-2" id="lightSettingsButton" type="button" aria-label="Mở cài đặt hẹn giờ đèn" aria-controls="lightSettingsModal" aria-expanded="false">
+<i class="fa-solid fa-gear"></i>
+</button>
+<button class="help-trigger absolute top-2 right-2" type="button" aria-label="Mở hướng dẫn đèn" aria-controls="helpPopover" aria-expanded="false" data-help-key="light">
+<i class="fa-solid fa-circle-question"></i>
+</button>
+<div class="w-10 h-10 bg-[#dbe6f5] text-white rounded-full flex items-center justify-center" id="lightControlIcon">
+<i class="fa-solid fa-lightbulb"></i>
+</div>
+<div class="text-center">
+<p class="text-xs font-semibold">Đèn</p>
+<p class="text-xs text-slate-400" id="lightControlStatus">Tắt</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only toggle-checkbox" id="lightToggle" type="checkbox"/>
+<div class="w-10 h-5 bg-gray-200 rounded-full toggle-label transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+<div class="flex items-center gap-2">
+<span class="text-[10px] text-slate-500">Tự động</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only toggle-checkbox" id="autoLightToggle" type="checkbox"/>
+<div class="w-9 h-4 bg-gray-200 rounded-full toggle-label transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all"></div>
+</label>
+</div>
+<p class="light-schedule-notice" id="lightScheduleNotice" aria-live="polite"></p>
+</div>
+<!-- Fan Toggle -->
+<div class="bg-white p-4 rounded-2xl card-shadow flex flex-col items-center gap-2 relative" id="fanCard">
+<button class="light-settings-trigger fan-settings-trigger absolute top-2 left-2" id="fanSettingsButton" type="button" aria-label="Mở cài đặt hẹn giờ quạt" aria-controls="fanSettingsModal" aria-expanded="false">
+<i class="fa-solid fa-gear"></i>
+</button>
+<button class="help-trigger absolute top-2 right-2" type="button" aria-label="Mở hướng dẫn quạt" aria-controls="helpPopover" aria-expanded="false" data-help-key="fan">
+<i class="fa-solid fa-circle-question"></i>
+</button>
+<div class="w-10 h-10 bg-[#dbe6f5] text-white rounded-full flex items-center justify-center" id="fanIcon">
+<i class="fa-solid fa-fan"></i>
+</div>
+<div class="text-center">
+<p class="text-xs font-semibold">Quạt</p>
+<p class="text-xs text-slate-400" id="fanStatus">Tắt</p>
+</div>
+<div class="fan-speed-control" aria-label="Tốc độ quạt">
+<div class="flex items-center justify-between w-full">
+<span class="text-[10px] text-slate-500">Tốc độ</span>
+<span class="text-[10px] font-semibold text-slate-500" id="fanSpeedValue">60%</span>
+</div>
+<input aria-label="Tốc độ quạt" class="fan-speed-slider" id="fanSpeedSlider" max="100" min="0" step="10" type="range" value="60"/>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only toggle-checkbox" id="fanToggle" type="checkbox"/>
+<div class="w-10 h-5 bg-gray-200 rounded-full toggle-label transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+<p class="light-schedule-notice fan-schedule-notice" id="fanScheduleNotice" aria-live="polite"></p>
+</div>
+<!-- LED RGB Toggle -->
+<div class="bg-white p-4 rounded-2xl card-shadow flex flex-col items-center gap-2 relative" id="rgbLedCard">
+<button class="help-trigger absolute top-2 right-2" type="button" aria-label="Mở hướng dẫn LED RGB" aria-controls="helpPopover" aria-expanded="false" data-help-key="rgb">
+<i class="fa-solid fa-circle-question"></i>
+</button>
+<div class="w-10 h-10 bg-[#dbe6f5] text-white rounded-full flex items-center justify-center" id="rgbLedIcon">
+<i class="fa-solid fa-lightbulb"></i>
+</div>
+<div class="text-center">
+<p class="text-xs font-semibold">LED RGB</p>
+<p class="text-xs text-slate-400" id="rgbLedStatus">Tắt</p>
+</div>
+<div aria-label="Chọn màu LED RGB" class="honeycomb-picker" role="radiogroup">
+<div class="honeycomb-row">
+<button aria-label="Màu đỏ" class="honeycomb-cell" data-color="#ff0000" data-name="Đỏ" style="--swatch:#ff0000" type="button"></button>
+<button aria-label="Màu cam" class="honeycomb-cell" data-color="#ff6a00" data-name="Cam" style="--swatch:#ff6a00" type="button"></button>
+<button aria-label="Màu vàng" class="honeycomb-cell" data-color="#ffd400" data-name="Vàng" style="--swatch:#ffd400" type="button"></button>
+</div>
+<div class="honeycomb-row honeycomb-row-wide">
+<button aria-label="Màu xanh lá" class="honeycomb-cell" data-color="#00c853" data-name="Xanh lá" style="--swatch:#00c853" type="button"></button>
+<button aria-label="Màu cyan" class="honeycomb-cell" data-color="#00e5ff" data-name="Cyan" style="--swatch:#00e5ff" type="button"></button>
+<button aria-label="Màu xanh dương" aria-checked="true" class="honeycomb-cell is-selected" data-color="#005bff" data-name="Xanh dương" role="radio" style="--swatch:#005bff" type="button"></button>
+</div>
+<div class="honeycomb-row">
+<button aria-label="Màu tím" class="honeycomb-cell" data-color="#7c3aed" data-name="Tím" style="--swatch:#7c3aed" type="button"></button>
+<button aria-label="Màu hồng" class="honeycomb-cell" data-color="#ff00b8" data-name="Hồng" style="--swatch:#ff00b8" type="button"></button>
+<button aria-label="Màu lime" class="honeycomb-cell" data-color="#7cff00" data-name="Lime" style="--swatch:#7cff00" type="button"></button>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only toggle-checkbox" type="checkbox"/>
+<div class="w-10 h-5 bg-gray-200 rounded-full toggle-label transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+</div>
+<!-- Main Door -->
+<div class="bg-white p-4 rounded-2xl card-shadow flex flex-col items-center gap-2 relative" id="mainDoorCard">
+<button class="help-trigger absolute top-2 right-2" type="button" aria-label="Mở hướng dẫn cửa chính" aria-controls="helpPopover" aria-expanded="false" data-help-key="main-door">
+<i class="fa-solid fa-circle-question"></i>
+</button>
+<div class="w-10 h-10 bg-mekong-blue text-white rounded-full flex items-center justify-center" id="mainDoorIcon">
+<i class="fa-solid fa-door-closed"></i>
+</div>
+<div class="text-center">
+<p class="text-xs font-semibold">Cửa chính</p>
+<p class="text-xs text-slate-400" id="mainDoorStatus">Đóng</p>
+</div>
+<button aria-label="Đổi trạng thái cửa chính" aria-pressed="false" class="door-action-button" id="mainDoorToggle" type="button">
+<i class="fa-solid fa-lock"></i>
+</button>
+</div>
+<!-- RFID Key -->
+<div class="bg-white p-4 rounded-2xl card-shadow flex flex-col items-center gap-2 border-b-4 border-mekong-blue relative" id="autoDoorCard">
+<button class="help-trigger absolute top-2 right-2" type="button" aria-label="Mở hướng dẫn chìa khóa RFID" aria-controls="helpPopover" aria-expanded="false" data-help-key="auto-door">
+<i class="fa-solid fa-circle-question"></i>
+</button>
+<div class="w-10 h-10 bg-mekong-blue text-white rounded-full flex items-center justify-center" id="autoDoorIcon">
+<i class="fa-solid fa-door-open"></i>
+</div>
+<div class="text-center">
+<p class="text-xs font-semibold">Chìa khóa RFID</p>
+<p class="text-xs text-mekong-blue" id="autoDoorStatus">Bật</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only toggle-checkbox" id="autoDoorToggle" type="checkbox"/>
+<div class="w-10 h-5 bg-gray-200 rounded-full toggle-label transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+</div>
+<!-- Buzzer -->
+<div class="bg-white p-4 rounded-2xl card-shadow flex flex-col gap-3 relative" id="buzzerCard">
+<button class="help-trigger absolute top-2 right-2" type="button" aria-label="Mở hướng dẫn buzzer" aria-controls="helpPopover" aria-expanded="false" data-help-key="buzzer">
+<i class="fa-solid fa-circle-question"></i>
+</button>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 bg-[#dbe6f5] text-white rounded-full flex items-center justify-center" id="buzzerIcon">
+<i class="fa-solid fa-volume-high"></i>
+</div>
+<div class="text-center">
+<p class="text-xs font-semibold">Buzzer</p>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between gap-3">
+<span class="text-[10px] text-slate-500 leading-tight">Phát âm cảnh báo khi thấy người</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only toggle-checkbox" id="buzzerDetectToggle" type="checkbox"/>
+<div class="w-10 h-5 bg-gray-200 rounded-full toggle-label transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Alerts -->
+<div class="col-span-4" data-purpose="alerts-list">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold text-mekong-blue">CẢNH BÁO</h3>
+<button class="help-trigger" type="button" aria-label="Mở hướng dẫn cảnh báo" aria-controls="helpPopover" aria-expanded="false" data-help-key="alerts">
+<i class="fa-solid fa-circle-question"></i>
+</button>
+</div>
+<div class="bg-white p-4 rounded-2xl card-shadow h-[calc(100%-2.5rem)] flex flex-col">
+<div class="space-y-4 flex-1" id="alertsList"></div>
+<a class="mt-4 pt-4 border-t border-[#dbe6f5] flex items-center justify-between text-xs text-mekong-blue font-bold" href="#">
+                Xem tất cả cảnh báo
+                <i class="fa-solid fa-chevron-right"></i>
+</a>
+</div>
+</div>
+</div>
+<!-- END: Middle Row -->
+<!-- BEGIN: Bottom Row -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Temperature Chart -->
+<div class="col-span-12" data-purpose="temperature-chart">
+<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+<div>
+<div class="flex items-center gap-3">
+<h3 class="text-lg font-bold text-mekong-blue">BIỂU ĐỒ NHIỆT ĐỘ</h3>
+<button class="help-trigger" type="button" aria-label="Mở hướng dẫn biểu đồ nhiệt độ" aria-controls="helpPopover" aria-expanded="false" data-help-key="chart">
+<i class="fa-solid fa-circle-question"></i>
+</button>
+</div>
+<p class="text-xs text-slate-500 mt-1" id="temperatureChartSubtitle">Đang tải dữ liệu nhiệt độ từ server...</p>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<button class="px-3 py-2 rounded-lg border border-[#dbe6f5] bg-white text-sm font-semibold text-mekong-blue hover:bg-mekong-light-blue transition-colors" id="temperatureChartPrevDay" type="button">
+< trước
+</button>
+<button class="px-3 py-2 rounded-lg border border-[#dbe6f5] bg-white text-sm font-semibold text-mekong-blue hover:bg-mekong-light-blue transition-colors" id="temperatureChartToday" type="button">
+Hôm nay
+</button>
+<button class="px-3 py-2 rounded-lg border border-[#dbe6f5] bg-white text-sm font-semibold text-mekong-blue hover:bg-mekong-light-blue transition-colors" id="temperatureChartNextDay" type="button">
+sau >
+</button>
+<select class="min-w-[92px] px-4 py-2 rounded-lg border border-[#dbe6f5] bg-white text-sm font-semibold text-mekong-blue focus:outline-none focus:ring-2 focus:ring-mekong-sky" id="temperatureChartGranularity">
+<option value="second">Giây</option>
+<option value="minute" selected="">Phút</option>
+<option value="hour">Giờ</option>
+</select>
+</div>
+</div>
+<div class="bg-white p-6 rounded-2xl card-shadow">
+<canvas class="w-full" height="200" id="tempChart"></canvas>
+</div>
+</div>
+</div>
+</div>
+<!-- END: Bottom Row -->
+</div>
+<!-- Footer Branding -->
+<footer class="mt-auto bg-mekong-blue py-2 px-8 flex justify-between items-center text-white text-[10px] font-medium tracking-wide">
+<span>MEKONG STEM - MEKONG CẤT CÁNH, STEM DẪN ĐƯỜNG</span>
+<div class="w-24 h-4 opacity-50">
+<svg height="100%" preserveaspectratio="none" viewbox="0 0 100 20" width="100%">
+<path d="M0,10 L40,10 L50,15 L70,15 L80,10 L100,10" fill="none" stroke="white" stroke-width="1"></path>
+</svg>
+</div>
+</footer>
+</main>
+<!-- END: Main Content Area -->
+</div>
+<div aria-hidden="true" class="light-settings-modal" id="lightSettingsModal" role="dialog" aria-modal="true" aria-labelledby="lightSettingsTitle">
+<div class="light-settings-modal__panel">
+<div class="light-settings-modal__header">
+<h2 id="lightSettingsTitle">Cài đặt đèn</h2>
+<button class="light-settings-modal__close" id="lightSettingsClose" type="button" aria-label="Đóng cài đặt đèn">
+<i class="fa-solid fa-xmark"></i>
+</button>
+</div>
+<div class="light-settings-modal__body">
+<fieldset class="light-settings-group">
+<legend class="light-settings-legend">
+<span>Hẹn giờ theo mốc</span>
+<button class="light-fixed-add" id="lightFixedAdd" type="button" aria-label="Thêm mốc hẹn giờ">
+<i class="fa-solid fa-plus"></i>
+</button>
+</legend>
+<label class="light-settings-option">
+<input checked="" id="lightScheduleModeFixed" name="lightScheduleMode" type="radio" value="fixed"/>
+<span>Đến giờ đã chọn thì</span>
+</label>
+<div class="light-fixed-list" id="lightFixedList">
+<div class="light-settings-inline light-fixed-row">
+<select id="lightFixedAction" aria-label="Hành động hẹn giờ">
+<option value="off">Tắt đèn</option>
+<option value="on">Bật đèn</option>
+</select>
+<input id="lightFixedTime" type="time" value="14:30" aria-label="Thời gian hẹn giờ"/>
+</div>
+</div>
+</fieldset>
+<fieldset class="light-settings-group">
+<legend>Bật trong khoảng thời gian</legend>
+<label class="light-settings-option">
+<input id="lightScheduleModeDuration" name="lightScheduleMode" type="radio" value="duration"/>
+<span>Bật ngay và tự tắt sau</span>
+</label>
+<div class="light-settings-inline">
+<select id="lightDurationPreset" aria-label="Thời lượng bật đèn">
+<option value="5">5 phút</option>
+<option value="10">10 phút</option>
+<option value="15">15 phút</option>
+<option value="custom">Tùy chọn</option>
+</select>
+<input id="lightDurationCustom" type="number" min="1" max="999" value="5" aria-label="Số phút tùy chọn"/>
+</div>
+</fieldset>
+</div>
+<div class="light-settings-modal__actions">
+<button class="light-settings-button light-settings-button--ghost" id="lightSettingsCancel" type="button">Hủy</button>
+<button class="light-settings-button light-settings-button--primary" id="lightSettingsOk" type="button">OK</button>
+</div>
+</div>
+</div>
+<div aria-hidden="true" class="light-settings-modal" id="fanSettingsModal" role="dialog" aria-modal="true" aria-labelledby="fanSettingsTitle">
+<div class="light-settings-modal__panel">
+<div class="light-settings-modal__header">
+<h2 id="fanSettingsTitle">Cài đặt quạt</h2>
+<button class="light-settings-modal__close" id="fanSettingsClose" type="button" aria-label="Đóng cài đặt quạt">
+<i class="fa-solid fa-xmark"></i>
+</button>
+</div>
+<div class="light-settings-modal__body">
+<fieldset class="light-settings-group">
+<legend class="light-settings-legend">
+<span>Hẹn giờ theo mốc</span>
+<button class="light-fixed-add" id="fanFixedAdd" type="button" aria-label="Thêm mốc hẹn giờ quạt">
+<i class="fa-solid fa-plus"></i>
+</button>
+</legend>
+<label class="light-settings-option">
+<input checked="" id="fanScheduleModeFixed" name="fanScheduleMode" type="radio" value="fixed"/>
+<span>Đến giờ đã chọn thì</span>
+</label>
+<div class="light-fixed-list" id="fanFixedList">
+<div class="light-settings-inline light-fixed-row">
+<select id="fanFixedAction" aria-label="Hành động hẹn giờ quạt">
+<option value="off">Tắt quạt</option>
+<option value="on">Bật quạt</option>
+</select>
+<input id="fanFixedTime" type="time" value="14:30" aria-label="Thời gian hẹn giờ quạt"/>
+</div>
+</div>
+</fieldset>
+<fieldset class="light-settings-group">
+<legend>Bật trong khoảng thời gian</legend>
+<label class="light-settings-option">
+<input id="fanScheduleModeDuration" name="fanScheduleMode" type="radio" value="duration"/>
+<span>Bật ngay và tự tắt sau</span>
+</label>
+<div class="light-settings-inline">
+<select id="fanDurationPreset" aria-label="Thời lượng bật quạt">
+<option value="5">5 phút</option>
+<option value="10">10 phút</option>
+<option value="15">15 phút</option>
+<option value="custom">Tùy chọn</option>
+</select>
+<input id="fanDurationCustom" type="number" min="1" max="999" value="5" aria-label="Số phút tùy chọn"/>
+</div>
+</fieldset>
+</div>
+<div class="light-settings-modal__actions">
+<button class="light-settings-button light-settings-button--ghost" id="fanSettingsCancel" type="button">Hủy</button>
+<button class="light-settings-button light-settings-button--primary" id="fanSettingsOk" type="button">OK</button>
+</div>
+</div>
+</div>
+<div aria-hidden="true" class="help-popover" id="helpPopover" role="dialog"></div>
+
+</body></html>
