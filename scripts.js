@@ -648,9 +648,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (!rgbCard || !rgbIcon || !rgbStatus || !colorButtons.length) return;
 
-  const mqttTopic = (channel) => channel;
+  const mqttBaseTopic = 'luong873004/feeds';
+  const mqttTopic = (channel) => `${mqttBaseTopic}/${channel}`;
   const mqttConfig = {
-    url: 'ws://mqtt.ohstem.vn:8083/mqtt',
+    url: 'wss://mqtt.ohstem.vn:8084/mqtt',
     username: 'luong873004',
     password: 'mekongstem@2025',
     lightStateTopic: mqttTopic('V1'),
