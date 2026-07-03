@@ -290,17 +290,20 @@ async def task_I_j_x_t():
       create_task(task_on_message_1())
     elif khi_gas <= 200:
       gas_alarm_active = False
+      buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
 
 async def task_on_message_1():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
-  for count in range(5):
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng, gas_alarm_active
+  while gas_alarm_active:
     buzzer_D7.write_analog(round(translate(70, 0, 100, 0, 1023)))
     await asleep_ms(300)
     buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
     await asleep_ms(300)
-  oled.fill(0); oled.show()
-  await Hi_E1_BB_83n_th_E1_BB_8B_ban__C4_91_E1_BA_A7u()
-  neopix.show(0, hex_to_rgb('#000000'))
+  buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
+  if not gas_alarm_active:
+    oled.fill(0); oled.show()
+    await Hi_E1_BB_83n_th_E1_BB_8B_ban__C4_91_E1_BA_A7u()
+    neopix.show(0, hex_to_rgb('#000000'))
 
 mqtt_client = MQTTClient(cfg); MQTTClient.DEBUG = True
 
