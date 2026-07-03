@@ -180,27 +180,42 @@
 <p class="text-xs font-semibold">LED RGB</p>
 <p class="text-xs text-slate-400" id="rgbLedStatus">Tắt</p>
 </div>
+<button class="rgb-color-trigger" id="rgbColorButton" type="button" aria-label="Mở bảng chọn màu LED RGB" aria-controls="rgbColorPopover" aria-expanded="false">
+<span class="rgb-color-trigger__swatch" aria-hidden="true"></span>
+<span>Chọn màu</span>
+</button>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only toggle-checkbox" type="checkbox"/>
+<div class="w-10 h-5 bg-gray-200 rounded-full toggle-label transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+<div aria-hidden="true" class="rgb-color-popover" id="rgbColorPopover" role="dialog" aria-modal="true" aria-labelledby="rgbColorPopoverTitle">
+<div class="rgb-color-popover__panel">
+<div class="rgb-color-popover__header">
+<h2 id="rgbColorPopoverTitle">Chọn màu LED RGB</h2>
+<button class="rgb-color-popover__close" id="rgbColorClose" type="button" aria-label="Đóng bảng chọn màu LED RGB">
+<i class="fa-solid fa-xmark"></i>
+</button>
+</div>
 <div aria-label="Chọn màu LED RGB" class="honeycomb-picker" role="radiogroup">
 <div class="honeycomb-row">
 <button aria-label="Màu đỏ" class="honeycomb-cell" data-color="#ff0000" data-name="Đỏ" style="--swatch:#ff0000" type="button"></button>
 <button aria-label="Màu cam" class="honeycomb-cell" data-color="#ff6a00" data-name="Cam" style="--swatch:#ff6a00" type="button"></button>
 <button aria-label="Màu vàng" class="honeycomb-cell" data-color="#ffd400" data-name="Vàng" style="--swatch:#ffd400" type="button"></button>
-</div>
-<div class="honeycomb-row honeycomb-row-wide">
 <button aria-label="Màu xanh lá" class="honeycomb-cell" data-color="#00c853" data-name="Xanh lá" style="--swatch:#00c853" type="button"></button>
-<button aria-label="Màu cyan" class="honeycomb-cell" data-color="#00e5ff" data-name="Cyan" style="--swatch:#00e5ff" type="button"></button>
 <button aria-label="Màu xanh dương" aria-checked="true" class="honeycomb-cell is-selected" data-color="#005bff" data-name="Xanh dương" role="radio" style="--swatch:#005bff" type="button"></button>
+<button aria-label="Màu tím" class="honeycomb-cell" data-color="#7c3aed" data-name="Tím" style="--swatch:#7c3aed" type="button"></button>
 </div>
 <div class="honeycomb-row">
-<button aria-label="Màu tím" class="honeycomb-cell" data-color="#7c3aed" data-name="Tím" style="--swatch:#7c3aed" type="button"></button>
+<button aria-label="Màu tím đậm" class="honeycomb-cell" data-color="#8a0099" data-name="Tím đậm" style="--swatch:#8a0099" type="button"></button>
 <button aria-label="Màu hồng" class="honeycomb-cell" data-color="#ff00b8" data-name="Hồng" style="--swatch:#ff00b8" type="button"></button>
-<button aria-label="Màu lime" class="honeycomb-cell" data-color="#7cff00" data-name="Lime" style="--swatch:#7cff00" type="button"></button>
+<button aria-label="Màu nâu cam" class="honeycomb-cell" data-color="#c75a00" data-name="Nâu cam" style="--swatch:#c75a00" type="button"></button>
+<button aria-label="Màu xanh trời" class="honeycomb-cell" data-color="#0ea5e9" data-name="Xanh trời" style="--swatch:#0ea5e9" type="button"></button>
+<button aria-label="Màu chàm nhạt" class="honeycomb-cell" data-color="#8187c9" data-name="Chàm nhạt" style="--swatch:#8187c9" type="button"></button>
+<button aria-label="Màu trắng" class="honeycomb-cell" data-color="#ffffff" data-name="Trắng" style="--swatch:#ffffff" type="button"></button>
 </div>
 </div>
-<label class="relative inline-flex items-center cursor-pointer">
-<input class="sr-only toggle-checkbox" type="checkbox"/>
-<div class="w-10 h-5 bg-gray-200 rounded-full toggle-label transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
-</label>
+</div>
+</div>
 </div>
 <!-- Main Door -->
 <div class="bg-white p-4 rounded-2xl card-shadow flex flex-col items-center gap-2 relative" id="mainDoorCard">

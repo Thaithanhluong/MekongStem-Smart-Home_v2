@@ -576,6 +576,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const rgbIcon = document.getElementById('rgbLedIcon');
   const rgbStatus = document.getElementById('rgbLedStatus');
   const colorButtons = document.querySelectorAll('.honeycomb-cell');
+  const rgbColorButton = document.getElementById('rgbColorButton');
+  const rgbColorButtonSwatch = rgbColorButton?.querySelector('.rgb-color-trigger__swatch');
+  const rgbColorPopover = document.getElementById('rgbColorPopover');
+  const rgbColorClose = document.getElementById('rgbColorClose');
   const rgbToggle = rgbCard?.querySelector('.toggle-checkbox');
   const fanCard = document.getElementById('fanCard');
   const fanIcon = document.getElementById('fanIcon');
@@ -1399,6 +1403,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     button.classList.add('is-selected');
     button.setAttribute('aria-checked', 'true');
+    if (rgbColorButtonSwatch) {
+      rgbColorButtonSwatch.style.backgroundColor = color;
+    }
+    if (rgbColorButton) {
+      rgbColorButton.setAttribute('aria-label', `Mở bảng chọn màu LED RGB, đang chọn ${name}`);
+    }
     if (!rgbToggle || rgbToggle.checked) {
       rgbStatus.textContent = name;
       rgbStatus.style.color = color;
@@ -1427,6 +1437,22 @@ document.addEventListener('DOMContentLoaded', function() {
     if (button) {
       setRgbColor(button, shouldPublish);
     }
+  };
+
+  const openRgbColorPopover = () => {
+    if (!rgbColorPopover) return;
+    rgbColorPopover.classList.add('is-visible');
+    rgbColorPopover.setAttribute('aria-hidden', 'false');
+    rgbColorButton?.setAttribute('aria-expanded', 'true');
+    const selected = rgbColorPopover.querySelector('.honeycomb-cell.is-selected');
+    selected?.focus();
+  };
+
+  const closeRgbColorPopover = () => {
+    if (!rgbColorPopover) return;
+    rgbColorPopover.classList.remove('is-visible');
+    rgbColorPopover.setAttribute('aria-hidden', 'true');
+    rgbColorButton?.setAttribute('aria-expanded', 'false');
   };
 
   const addMotionAlert = () => {
@@ -2295,7 +2321,25 @@ document.addEventListener('DOMContentLoaded', function() {
   colorButtons.forEach((button) => {
     button.setAttribute('role', 'radio');
     button.setAttribute('aria-checked', button.classList.contains('is-selected') ? 'true' : 'false');
-    button.addEventListener('click', () => setRgbColor(button));
+    button.addEventListener('click', () => {
+      setRgbColor(button);
+      closeRgbColorPopover();
+    });
+  });
+
+  rgbColorButton?.addEventListener('click', openRgbColorPopover);
+  rgbColorClose?.addEventListener('click', closeRgbColorPopover);
+  rgbColorPopover?.addEventListener('click', (event) => {
+    if (event.target === rgbColorPopover) {
+      closeRgbColorPopover();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && rgbColorPopover?.classList.contains('is-visible')) {
+      closeRgbColorPopover();
+      rgbColorButton?.focus();
+    }
   });
 
   rgbToggle?.addEventListener('change', () => {
