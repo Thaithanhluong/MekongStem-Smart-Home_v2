@@ -9,7 +9,7 @@ from dht20 import *
 
 # Mô tả hàm này...
 async def Hi_E1_BB_87u_ch_E1_BB_89nh_c_E1_BA_A3m_bi_E1_BA_BFn_gas():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   oled.fill(0); oled.show()
   oled.text(str('Hieu chinh'), 1-1, 1-1, 1); oled.show()
   oled.text(str('cam bien...'), 1-1, 10-1, 1); oled.show()
@@ -22,7 +22,7 @@ async def Hi_E1_BB_87u_ch_E1_BB_89nh_c_E1_BA_A3m_bi_E1_BA_BFn_gas():
   oled.fill(0); oled.show()
 
 async def on_mqtt_msg_f_k_q_l(topic, msg):
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   last_LED_state = msg
   if msg == '1':
     rgb_led_D9.show(0, hex_to_rgb(color))
@@ -30,7 +30,7 @@ async def on_mqtt_msg_f_k_q_l(topic, msg):
     rgb_led_D9.show(0, hex_to_rgb('#000000'))
 
 async def on_mqtt_msg_J_V_x_E(topic, msg):
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   color = msg
   if last_LED_state == '1':
     rgb_led_D9.show(0, hex_to_rgb(color))
@@ -48,7 +48,7 @@ TOPIC_MOTION = 'V8'
 TOPIC_FAN_STATE = 'V9'
 TOPIC_FAN_SPEED = 'V10'
 TOPIC_AUTO_LIGHT = 'V12'
-TOPIC_BUZZER_DETECT = 'V13'
+TOPIC_MOTION_LIGHT = 'V13'
 TOPIC_MAIN_DOOR = 'V14'
 TOPIC_RFID_DOOR = 'V15'
 TOPIC_BUZZER = 'V16'
@@ -71,7 +71,7 @@ async def read_dht20_safe():
 
 # Mô tả hàm này...
 async def K_E1_BA_BFt_n_E1_BB_91i_Wifi():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   oled.text(str('Wifi connecting...'), 1-1, 1-1, 1); oled.show()
   await mqtt_client.connect()
   oled.fill(0); oled.show()
@@ -81,11 +81,11 @@ async def K_E1_BA_BFt_n_E1_BB_91i_Wifi():
 
 # Mô tả hàm này...
 async def Kh_E1_BB_9Fi__C4_91_E1_BB_99ng():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   RFID = '1'
   AUTO_LIGHT = '0'
   last_LED_state = '0'
-  buzzer_when_detect = '0'
+  auto_light_when_detect = '0'
   speed = '20'
   color = '#ff0000'
   neopix.show(0, hex_to_rgb('#ff0000'))
@@ -95,7 +95,7 @@ async def Kh_E1_BB_9Fi__C4_91_E1_BB_99ng():
   neopix.show(0, hex_to_rgb('#000000'))
 
 async def on_mqtt_msg_c_A_i_o(topic, msg):
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   last_fan_state = msg
   if msg == '1':
     minifan_D4.write_analog(round(translate(speed, 0, 100, 0, 1023)))
@@ -103,13 +103,13 @@ async def on_mqtt_msg_c_A_i_o(topic, msg):
     minifan_D4.write_analog(round(translate(0, 0, 100, 0, 1023)))
 
 async def on_mqtt_msg_y_z_p_e(topic, msg):
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   speed = int((msg))
   if last_fan_state == '1':
     minifan_D4.write_analog(round(translate(speed, 0, 100, 0, 1023)))
 
 async def on_mqtt_msg_O_N_P_T(topic, msg):
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   light = msg
   if light == '1':
     usb_switch_D3.write_analog(round(translate(100, 0, 100, 0, 1023)))
@@ -118,7 +118,7 @@ async def on_mqtt_msg_O_N_P_T(topic, msg):
 
 # Mô tả hàm này...
 async def Hi_E1_BB_83n_th_E1_BB_8B_ban__C4_91_E1_BA_A7u():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   _C3_81nh_s_C3_A1ng = light_A0.read_analog_percent()
   dht20_ok = await read_dht20_safe()
   oled.fill(0); oled.show()
@@ -138,32 +138,31 @@ async def Hi_E1_BB_83n_th_E1_BB_8B_ban__C4_91_E1_BA_A7u():
   await mqtt_client.publish(TOPIC_RGB_STATE, last_LED_state)
   await mqtt_client.publish(TOPIC_FAN_STATE, last_fan_state)
   await mqtt_client.publish(TOPIC_LIGHT_STATE, light)
-  await mqtt_client.publish(TOPIC_BUZZER_DETECT, buzzer_when_detect)
+  await mqtt_client.publish(TOPIC_MOTION_LIGHT, auto_light_when_detect)
   await mqtt_client.publish(TOPIC_MAIN_DOOR, C_E1_BB_ADa)
   await mqtt_client.publish(TOPIC_RFID_DOOR, RFID)
   await mqtt_client.publish(TOPIC_AUTO_LIGHT, AUTO_LIGHT)
 
 async def on_mqtt_msg_V_d_z_u(topic, msg):
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   AUTO_LIGHT = msg
 
-async def on_mqtt_msg_R_Y_z_G(topic, msg):
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
-  buzzer_when_detect = msg
-  if buzzer_when_detect == '1':
-    buzzer_when_detect = '1'
+async def on_mqtt_msg_motion_light(topic, msg):
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  if msg == '1':
+    auto_light_when_detect = '1'
   else:
-    buzzer_when_detect = '0'
+    auto_light_when_detect = '0'
 
 async def on_mqtt_msg_buzzer_manual(topic, msg):
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   if msg == '1':
     buzzer_D7.write_analog(round(translate(70, 0, 100, 0, 1023)))
   else:
     buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
 
 async def on_mqtt_msg_X_v_h_D(topic, msg):
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   C_E1_BB_ADa = msg
   if C_E1_BB_ADa == '1':
     servo_D2.servo_write(100)
@@ -177,14 +176,14 @@ async def on_mqtt_msg_X_v_h_D(topic, msg):
     buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
 
 async def on_mqtt_msg_k_x_E_F(topic, msg):
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   ARE_U_HERE = msg
   if ARE_U_HERE == 'ARE U HERE':
     await mqtt_client.publish(TOPIC_DEVICE, 'HERE')
     print('HERE', end =' ')
 
 async def on_mqtt_msg_r_E_x_W(topic, msg):
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   RFID = msg
   print(RFID)
 
@@ -195,7 +194,7 @@ last_fan_state = None
 speed = None
 light = None
 AUTO_LIGHT = None
-buzzer_when_detect = None
+auto_light_when_detect = None
 C_E1_BB_ADa = None
 ARE_U_HERE = None
 last_LED_state = None
@@ -227,7 +226,7 @@ usb_switch_D3 = Pins(D3_PIN)
 cfg['topics'].append((TOPIC_LIGHT_STATE, on_mqtt_msg_O_N_P_T))
 light_A0 = Pins(A0_PIN)
 cfg['topics'].append((TOPIC_AUTO_LIGHT, on_mqtt_msg_V_d_z_u))
-cfg['topics'].append((TOPIC_BUZZER_DETECT, on_mqtt_msg_R_Y_z_G))
+cfg['topics'].append((TOPIC_MOTION_LIGHT, on_mqtt_msg_motion_light))
 cfg['topics'].append((TOPIC_MAIN_DOOR, on_mqtt_msg_X_v_h_D))
 cfg['topics'].append((TOPIC_DEVICE, on_mqtt_msg_k_x_E_F))
 cfg['topics'].append((TOPIC_RFID_DOOR, on_mqtt_msg_r_E_x_W))
@@ -240,7 +239,7 @@ import yolo_uno
 yolo_uno.deinit = deinit
 
 async def task_on_event_u_F_P_I():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   while True:
     await asleep_ms(250)
     try:
@@ -265,7 +264,7 @@ async def task_on_event_u_F_P_I():
       neopix.show(0, hex_to_rgb('#000000'))
 
 async def task_I_j_x_t():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng, gas_alarm_active
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng, gas_alarm_active
   while True:
     await asleep_ms(1000)
     khi_gas = round(await mq_A2.readLPG())
@@ -279,7 +278,7 @@ async def task_I_j_x_t():
       gas_alarm_active = False
 
 async def task_on_message_1():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   for count in range(5):
     buzzer_D7.write_analog(round(translate(70, 0, 100, 0, 1023)))
     await asleep_ms(300)
@@ -292,7 +291,7 @@ async def task_on_message_1():
 mqtt_client = MQTTClient(cfg); MQTTClient.DEBUG = True
 
 async def task_N_h_S_S():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   while True:
     await asleep_ms(30000)
     dht20_ok = await read_dht20_safe()
@@ -315,23 +314,22 @@ async def task_N_h_S_S():
     await mqtt_client.publish(TOPIC_GAS, khi_gas)
 
 async def task_on_event_R_g_c_l():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng, pir_motion_active
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng, pir_motion_active
   while True:
     await asleep_ms(100)
     if (pir_D5.read_digital() == 1):
       if not pir_motion_active:
         pir_motion_active = True
         await mqtt_client.publish(TOPIC_MOTION, 'DETECTED')
-      if buzzer_when_detect == '1':
-        buzzer_D7.write_analog(round(translate(70, 0, 100, 0, 1023)))
-        await asleep_ms(300)
-        buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
-        await asleep_ms(300)
+      if auto_light_when_detect == '1' and light != '1':
+        light = '1'
+        usb_switch_D3.write_analog(round(translate(100, 0, 100, 0, 1023)))
+        await mqtt_client.publish(TOPIC_LIGHT_STATE, light)
     else:
       pir_motion_active = False
 
 async def task_F_y_v_l():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   while True:
     await asleep_ms(5000)
     if AUTO_LIGHT == '1':
@@ -344,7 +342,7 @@ async def task_F_y_v_l():
       AUTO_LIGHT = '0'
 
 async def setup():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   print('App started')
   print('Bắt đầu khởi động')
   await Kh_E1_BB_9Fi__C4_91_E1_BB_99ng()

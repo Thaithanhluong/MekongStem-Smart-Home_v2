@@ -605,7 +605,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const buzzerIcon = document.getElementById('buzzerIcon');
   const buzzerStatus = document.getElementById('buzzerStatus');
   const buzzerToggle = document.getElementById('buzzerToggle');
-  const buzzerDetectToggle = document.getElementById('buzzerDetectToggle');
+  const motionLightCard = document.getElementById('motionLightCard');
+  const motionLightIcon = document.getElementById('motionLightIcon');
+  const motionLightToggle = document.getElementById('motionLightToggle');
   const mainDoorCard = document.getElementById('mainDoorCard');
   const mainDoorIcon = document.getElementById('mainDoorIcon');
   const mainDoorStatus = document.getElementById('mainDoorStatus');
@@ -669,7 +671,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fanStateTopic: mqttTopic('V9'),
     fanSpeedTopic: mqttTopic('V10'),
     autoLightTopic: mqttTopic('V12'),
-    buzzerDetectStateTopic: mqttTopic('V13'),
+    motionLightStateTopic: mqttTopic('V13'),
     mainDoorStateTopic: mqttTopic('V14'),
     autoDoorStateTopic: mqttTopic('V15'),
     buzzerStateTopic: mqttTopic('V16'),
@@ -679,7 +681,7 @@ document.addEventListener('DOMContentLoaded', function() {
     rgbStatusTopic: mqttTopic('V3'),
     fanStatusTopic: mqttTopic('V9'),
     buzzerStatusTopic: mqttTopic('V16'),
-    buzzerDetectStatusTopic: mqttTopic('V13'),
+    motionLightStatusTopic: mqttTopic('V13'),
     mainDoorStatusTopic: mqttTopic('V14'),
     autoDoorStatusTopic: mqttTopic('V15'),
     autoLightStatusTopic: mqttTopic('V12'),
@@ -817,7 +819,7 @@ document.addEventListener('DOMContentLoaded', function() {
     mqttConfig.rgbStatusTopic,
     mqttConfig.fanStatusTopic,
     mqttConfig.buzzerStatusTopic,
-    mqttConfig.buzzerDetectStatusTopic,
+    mqttConfig.motionLightStatusTopic,
     mqttConfig.mainDoorStatusTopic,
     mqttConfig.autoDoorStatusTopic,
     mqttConfig.lightStatusTopic,
@@ -847,8 +849,8 @@ document.addEventListener('DOMContentLoaded', function() {
       updateFanUi(state);
     } else if (topic === mqttConfig.buzzerStatusTopic) {
       updateBuzzerUi(state);
-    } else if (topic === mqttConfig.buzzerDetectStatusTopic) {
-      updateBuzzerDetectUi(state);
+    } else if (topic === mqttConfig.motionLightStatusTopic) {
+      updateMotionLightUi(state);
     } else if (topic === mqttConfig.mainDoorStatusTopic) {
       updateMainDoorUi(state);
     } else if (topic === mqttConfig.autoDoorStatusTopic) {
@@ -1012,8 +1014,8 @@ document.addEventListener('DOMContentLoaded', function() {
     publishMqttMessage(mqttConfig.buzzerStateTopic, toBinaryStatePayload(isOn));
   };
 
-  const sendBuzzerDetectState = (isOn) => {
-    publishMqttMessage(mqttConfig.buzzerDetectStateTopic, toBinaryStatePayload(isOn));
+  const sendMotionLightState = (isOn) => {
+    publishMqttMessage(mqttConfig.motionLightStateTopic, toBinaryStatePayload(isOn));
   };
 
   const sendMainDoorState = (isOn) => {
@@ -1693,9 +1695,14 @@ document.addEventListener('DOMContentLoaded', function() {
       updateBuzzerUi(buzzerOn);
     }
 
-    const buzzerDetectOn = normalizeBoolean(controls.buzzerDetectOn ?? snapshot.buzzerDetectOn);
-    if (buzzerDetectOn !== null) {
-      updateBuzzerDetectUi(buzzerDetectOn);
+    const motionLightOn = normalizeBoolean(
+      controls.motionLightOn
+      ?? snapshot.motionLightOn
+      ?? controls.buzzerDetectOn
+      ?? snapshot.buzzerDetectOn
+    );
+    if (motionLightOn !== null) {
+      updateMotionLightUi(motionLightOn);
     }
 
     const mainDoorOpen = normalizeBoolean(controls.mainDoorOpen ?? snapshot.mainDoorOpen ?? controls.doorOpen ?? snapshot.doorOpen);
@@ -2148,12 +2155,24 @@ document.addEventListener('DOMContentLoaded', function() {
     persistControlState({ buzzerOn: isOn });
   };
 
-  const updateBuzzerDetectUi = (isOn) => {
-    if (buzzerDetectToggle && buzzerDetectToggle.checked !== isOn) {
-      buzzerDetectToggle.checked = isOn;
+  const updateMotionLightUi = (isOn) => {
+    if (motionLightToggle && motionLightToggle.checked !== isOn) {
+      motionLightToggle.checked = isOn;
     }
 
-    persistControlState({ buzzerDetectOn: isOn });
+    if (motionLightCard && motionLightIcon) {
+      if (isOn) {
+        motionLightIcon.style.backgroundColor = '#2a5ea9';
+        motionLightCard.style.borderBottomColor = '#2a5ea9';
+        motionLightCard.classList.add('border-b-4', 'border-mekong-blue');
+      } else {
+        motionLightIcon.style.backgroundColor = '#dbe6f5';
+        motionLightCard.style.borderBottomColor = '#dbe6f5';
+        motionLightCard.classList.remove('border-b-4', 'border-mekong-blue');
+      }
+    }
+
+    persistControlState({ motionLightOn: isOn });
   };
 
   const updateMainDoorUi = (isOpen) => {
@@ -2294,11 +2313,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  if (buzzerDetectToggle) {
-    updateBuzzerDetectUi(buzzerDetectToggle.checked);
-    buzzerDetectToggle.addEventListener('change', () => {
-      updateBuzzerDetectUi(buzzerDetectToggle.checked);
-      sendBuzzerDetectState(buzzerDetectToggle.checked);
+  if (motionLightToggle) {
+    updateMotionLightUi(motionLightToggle.checked);
+    motionLightToggle.addEventListener('change', () => {
+      updateMotionLightUi(motionLightToggle.checked);
+      sendMotionLightState(motionLightToggle.checked);
     });
   }
 
@@ -2444,13 +2463,13 @@ document.addEventListener('DOMContentLoaded', function() {
         'Màu xanh là đang bật, màu xám là đang tắt.',
       ],
     },
-    buzzer: {
-      title: 'Buzzer',
-      icon: 'fa-volume-high',
+    'motion-light': {
+      title: 'Tự bật đèn',
+      icon: 'fa-lightbulb',
       items: [
-        'Buzzer có thể dùng để phát âm cảnh báo khi phát hiện người.',
-        'Nếu không cần âm báo, hãy tắt công tắc bên dưới.',
-        'Tip: dùng ngắn âm lượng vừa phải để không gây ồn cho phòng.',
+        'Công tắc này bật chế độ tự bật đèn chính khi PIR phát hiện người.',
+        'Đèn được điều khiển qua topic <code>V1</code>, không phải LED RGB.',
+        'Tắt công tắc này nếu chỉ muốn điều khiển đèn thủ công.',
       ],
     },
     system: {
