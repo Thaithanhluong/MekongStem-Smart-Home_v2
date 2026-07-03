@@ -14,7 +14,7 @@ async def Hi_E1_BB_87u_ch_E1_BB_89nh_c_E1_BA_A3m_bi_E1_BA_BFn_gas():
   oled.text(str('Hieu chinh'), 1-1, 1-1, 1); oled.show()
   oled.text(str('cam bien...'), 1-1, 10-1, 1); oled.show()
   await mq_A2.calibrate(-1)
-  mq_A2.mode(MQ2.STRATEGY_ACCURATE)
+  mq_A2.mode(MQ2.STRATEGY_FAST)
   khi_gas = await mq_A2.readLPG()
   neopix.show(0, hex_to_rgb('#800080'))
   oled.fill(0); oled.show()
