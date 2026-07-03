@@ -53,6 +53,10 @@ TOPIC_MAIN_DOOR = 'V14'
 TOPIC_RFID_DOOR = 'V15'
 TOPIC_BUZZER = 'V16'
 TOPIC_DEVICE = 'V20'
+RFID_SCAN_INTERVAL_MS = 75
+RFID_ERROR_RETRY_MS = 500
+RFID_OPEN_HOLD_MS = 4000
+RFID_BEEP_MS = 100
 
 async def read_dht20_safe():
   global Nhi_E1_BB_87t__C4_91_E1_BB_99, _C4_90_E1_BB_99__E1_BA_A9m
@@ -203,6 +207,7 @@ _C4_90_E1_BB_99__E1_BA_A9m = None
 _C3_81nh_s_C3_A1ng = None
 gas_alarm_active = False
 pir_motion_active = False
+rfid_card_active = False
 mq_A2 = MQ2(pinData=A2_PIN)
 oled = SSD1306_I2C()
 servo_D2 = Pins(D2_PIN)
@@ -239,29 +244,37 @@ import yolo_uno
 yolo_uno.deinit = deinit
 
 async def task_on_event_u_F_P_I():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng, rfid_card_active
   while True:
-    await asleep_ms(250)
     try:
       card_ok = rfid.scan_and_check("rfids_1")
     except OSError as e:
       print('RFID error:', e)
-      await asleep_ms(1000)
+      await asleep_ms(RFID_ERROR_RETRY_MS)
       continue
-    if card_ok:
-      if RFID == '1':
-        neopix.show(0, hex_to_rgb('#00ff00'))
-        servo_D2.servo_write(100)
-        buzzer_D7.write_analog(round(translate(70, 0, 100, 0, 1023)))
-        await asleep_ms(100)
-        buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
-        await asleep_ms(4000)
-        servo_D2.servo_write(0)
-    else:
+
+    if not card_ok:
+      rfid_card_active = False
       neopix.show(0, hex_to_rgb('#000000'))
-      neopix.show(0, hex_to_rgb('#ff0000'))
-      await asleep_ms(2000)
+      await asleep_ms(RFID_SCAN_INTERVAL_MS)
+      continue
+
+    if RFID == '1' and not rfid_card_active:
+      rfid_card_active = True
+      neopix.show(0, hex_to_rgb('#00ff00'))
+      servo_D2.servo_write(100)
+      C_E1_BB_ADa = '1'
+      buzzer_D7.write_analog(round(translate(70, 0, 100, 0, 1023)))
+      await asleep_ms(RFID_BEEP_MS)
+      buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
+      await mqtt_client.publish(TOPIC_MAIN_DOOR, C_E1_BB_ADa)
+      await asleep_ms(RFID_OPEN_HOLD_MS)
+      servo_D2.servo_write(0)
+      C_E1_BB_ADa = '0'
+      await mqtt_client.publish(TOPIC_MAIN_DOOR, C_E1_BB_ADa)
       neopix.show(0, hex_to_rgb('#000000'))
+
+    await asleep_ms(RFID_SCAN_INTERVAL_MS)
 
 async def task_I_j_x_t():
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng, gas_alarm_active
