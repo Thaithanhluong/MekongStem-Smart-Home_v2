@@ -58,6 +58,7 @@ RFID_SCAN_INTERVAL_MS = 75
 RFID_ERROR_RETRY_MS = 500
 RFID_OPEN_HOLD_MS = 4000
 RFID_BEEP_MS = 100
+GAS_READ_INTERVAL_MS = 1000
 
 async def read_dht20_safe():
   global Nhi_E1_BB_87t__C4_91_E1_BB_99, _C4_90_E1_BB_99__E1_BA_A9m
@@ -73,6 +74,22 @@ async def read_dht20_safe():
       if retry < 4:
         await asleep_ms(700)
   return False
+
+def update_gas_oled():
+  if gas_alarm_active:
+    oled.fill(0); oled.show()
+    oled.text(str('Phat hien'), 1-1, 1-1, 1); oled.show()
+    oled.text(str('ro ri gas!!!!'), 1-1, 12-1, 1); oled.show()
+    oled.text(str((''.join([str(x) for x in ['Khi gas:', khi_gas, 'ppm']]))), 1-1, 45-1, 1); oled.show()
+  else:
+    oled.fill_rect(0, 44, 128, 10, 0)
+    oled.text(str((''.join([str(x) for x in ['Khi gas:', khi_gas, 'ppm']]))), 1-1, 45-1, 1); oled.show()
+
+async def publish_gas_safe():
+  try:
+    await mqtt_client.publish(TOPIC_GAS, khi_gas)
+  except Exception as e:
+    print('Gas MQTT publish error:', e)
 
 # Mô tả hàm này...
 async def K_E1_BA_BFt_n_E1_BB_91i_Wifi():
@@ -280,17 +297,16 @@ async def task_on_event_u_F_P_I():
 async def task_I_j_x_t():
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng, gas_alarm_active
   while True:
-    await asleep_ms(1000)
+    await asleep_ms(GAS_READ_INTERVAL_MS)
     khi_gas = round(await mq_A2.readLPG())
     if khi_gas > 200 and not gas_alarm_active:
       gas_alarm_active = True
-      oled.fill(0); oled.show()
-      oled.text(str('Phat hien'), 1-1, 1-1, 1); oled.show()
-      oled.text(str('ro ri gas!!!!'), 1-1, 12-1, 1); oled.show()
       create_task(task_on_message_1())
     elif khi_gas <= 200:
       gas_alarm_active = False
       buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
+    update_gas_oled()
+    await publish_gas_safe()
 
 async def task_on_message_1():
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng, gas_alarm_active
@@ -327,9 +343,6 @@ async def task_N_h_S_S():
       await mqtt_client.publish(TOPIC_TEMPERATURE, Nhi_E1_BB_87t__C4_91_E1_BB_99)
       await asleep_ms(500)
       await mqtt_client.publish(TOPIC_HUMIDITY, _C4_90_E1_BB_99__E1_BA_A9m)
-    await asleep_ms(500)
-    await mqtt_client.publish(TOPIC_GAS, khi_gas)
-
 async def task_on_event_R_g_c_l():
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng, pir_motion_active
   while True:
