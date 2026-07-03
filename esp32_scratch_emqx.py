@@ -9,11 +9,12 @@ from dht20 import *
 
 # Mô tả hàm này...
 async def Hi_E1_BB_87u_ch_E1_BB_89nh_c_E1_BA_A3m_bi_E1_BA_BFn_gas():
-  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  global card_ok, khi_gas, pir_motion_active, last_fan_state, Nhi_E1_BB_87t__C4_91_E1_BB_99, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, RFID, last_LED_state, color, gas_alarm_active, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   oled.fill(0); oled.show()
   oled.text(str('Hieu chinh'), 1-1, 1-1, 1); oled.show()
   oled.text(str('cam bien...'), 1-1, 10-1, 1); oled.show()
-  await mq_A2.calibrate(1.210233)
+  await mq_A2.calibrate(-1)
+  mq_A2.mode(MQ2.STRATEGY_ACCURATE)
   khi_gas = await mq_A2.readLPG()
   neopix.show(0, hex_to_rgb('#800080'))
   oled.fill(0); oled.show()
