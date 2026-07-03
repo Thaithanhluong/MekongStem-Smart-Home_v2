@@ -54,6 +54,21 @@ TOPIC_RFID_DOOR = 'V15'
 TOPIC_BUZZER = 'V16'
 TOPIC_DEVICE = 'V20'
 
+async def read_dht20_safe():
+  global Nhi_E1_BB_87t__C4_91_E1_BB_99, _C4_90_E1_BB_99__E1_BA_A9m
+  for retry in range(5):
+    try:
+      temperature = await dht20.atemperature()
+      humidity = await dht20.ahumidity()
+      Nhi_E1_BB_87t__C4_91_E1_BB_99 = temperature
+      _C4_90_E1_BB_99__E1_BA_A9m = humidity
+      return True
+    except OSError as e:
+      print('DHT20 error:', e)
+      if retry < 4:
+        await asleep_ms(700)
+  return False
+
 # Mô tả hàm này...
 async def K_E1_BA_BFt_n_E1_BB_91i_Wifi():
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
@@ -105,16 +120,20 @@ async def on_mqtt_msg_O_N_P_T(topic, msg):
 async def Hi_E1_BB_83n_th_E1_BB_8B_ban__C4_91_E1_BA_A7u():
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   _C3_81nh_s_C3_A1ng = light_A0.read_analog_percent()
-  Nhi_E1_BB_87t__C4_91_E1_BB_99 = await dht20.atemperature()
-  _C4_90_E1_BB_99__E1_BA_A9m = await dht20.ahumidity()
+  dht20_ok = await read_dht20_safe()
   oled.fill(0); oled.show()
-  oled.text(str((''.join([str(x5) for x5 in ['Nhiet do: ', Nhi_E1_BB_87t__C4_91_E1_BB_99, '*C']]))), 1-1, 1-1, 1); oled.show()
-  oled.text(str((''.join([str(x6) for x6 in ['Do am: ', _C4_90_E1_BB_99__E1_BA_A9m, '%']]))), 1-1, 15-1, 1); oled.show()
+  if Nhi_E1_BB_87t__C4_91_E1_BB_99 is None or _C4_90_E1_BB_99__E1_BA_A9m is None:
+    oled.text(str('DHT20 loi'), 1-1, 1-1, 1); oled.show()
+    oled.text(str('Thu lai sau'), 1-1, 15-1, 1); oled.show()
+  else:
+    oled.text(str((''.join([str(x5) for x5 in ['Nhiet do: ', Nhi_E1_BB_87t__C4_91_E1_BB_99, '*C']]))), 1-1, 1-1, 1); oled.show()
+    oled.text(str((''.join([str(x6) for x6 in ['Do am: ', _C4_90_E1_BB_99__E1_BA_A9m, '%']]))), 1-1, 15-1, 1); oled.show()
   oled.text(str((''.join([str(x7) for x7 in ['Anh sang:', _C3_81nh_s_C3_A1ng, '%']]))), 1-1, 30-1, 1); oled.show()
   oled.text(str((''.join([str(x8) for x8 in ['Khi gas:', khi_gas, 'ppm']]))), 1-1, 45-1, 1); oled.show()
   await mqtt_client.publish(TOPIC_LIGHT_SENSOR, _C3_81nh_s_C3_A1ng)
-  await mqtt_client.publish(TOPIC_TEMPERATURE, Nhi_E1_BB_87t__C4_91_E1_BB_99)
-  await mqtt_client.publish(TOPIC_HUMIDITY, _C4_90_E1_BB_99__E1_BA_A9m)
+  if dht20_ok:
+    await mqtt_client.publish(TOPIC_TEMPERATURE, Nhi_E1_BB_87t__C4_91_E1_BB_99)
+    await mqtt_client.publish(TOPIC_HUMIDITY, _C4_90_E1_BB_99__E1_BA_A9m)
   await mqtt_client.publish(TOPIC_GAS, khi_gas)
   await mqtt_client.publish(TOPIC_RGB_STATE, last_LED_state)
   await mqtt_client.publish(TOPIC_FAN_STATE, last_fan_state)
@@ -276,18 +295,22 @@ async def task_N_h_S_S():
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   while True:
     await asleep_ms(30000)
-    Nhi_E1_BB_87t__C4_91_E1_BB_99 = await dht20.atemperature()
-    _C4_90_E1_BB_99__E1_BA_A9m = await dht20.ahumidity()
+    dht20_ok = await read_dht20_safe()
     oled.fill(0); oled.show()
-    oled.text(str((''.join([str(x) for x in ['Nhiet do: ', Nhi_E1_BB_87t__C4_91_E1_BB_99, '*C']]))), 1-1, 1-1, 1); oled.show()
-    oled.text(str((''.join([str(x2) for x2 in ['Do am: ', _C4_90_E1_BB_99__E1_BA_A9m, '%']]))), 1-1, 15-1, 1); oled.show()
+    if Nhi_E1_BB_87t__C4_91_E1_BB_99 is None or _C4_90_E1_BB_99__E1_BA_A9m is None:
+      oled.text(str('DHT20 loi'), 1-1, 1-1, 1); oled.show()
+      oled.text(str('Thu lai sau'), 1-1, 15-1, 1); oled.show()
+    else:
+      oled.text(str((''.join([str(x) for x in ['Nhiet do: ', Nhi_E1_BB_87t__C4_91_E1_BB_99, '*C']]))), 1-1, 1-1, 1); oled.show()
+      oled.text(str((''.join([str(x2) for x2 in ['Do am: ', _C4_90_E1_BB_99__E1_BA_A9m, '%']]))), 1-1, 15-1, 1); oled.show()
     oled.text(str((''.join([str(x3) for x3 in ['Anh sang:', _C3_81nh_s_C3_A1ng, '%']]))), 1-1, 30-1, 1); oled.show()
     oled.text(str((''.join([str(x4) for x4 in ['Khi gas:', khi_gas, 'ppm']]))), 1-1, 45-1, 1); oled.show()
     await mqtt_client.publish(TOPIC_LIGHT_SENSOR, _C3_81nh_s_C3_A1ng)
-    await asleep_ms(500)
-    await mqtt_client.publish(TOPIC_TEMPERATURE, Nhi_E1_BB_87t__C4_91_E1_BB_99)
-    await asleep_ms(500)
-    await mqtt_client.publish(TOPIC_HUMIDITY, _C4_90_E1_BB_99__E1_BA_A9m)
+    if dht20_ok:
+      await asleep_ms(500)
+      await mqtt_client.publish(TOPIC_TEMPERATURE, Nhi_E1_BB_87t__C4_91_E1_BB_99)
+      await asleep_ms(500)
+      await mqtt_client.publish(TOPIC_HUMIDITY, _C4_90_E1_BB_99__E1_BA_A9m)
     await asleep_ms(500)
     await mqtt_client.publish(TOPIC_GAS, khi_gas)
 
@@ -331,6 +354,7 @@ async def setup():
   print('Đã kết nối wifi và Broker')
   print('Bắt đều hiệu chỉnh cảm biến khí Gas')
   await Hi_E1_BB_87u_ch_E1_BB_89nh_c_E1_BA_A3m_bi_E1_BA_BFn_gas()
+  await asleep_ms(2000)
   print('Đã hiệu chỉnh cảm biến Gas')
   await Hi_E1_BB_83n_th_E1_BB_8B_ban__C4_91_E1_BA_A7u()
   print('Đã hiển thị dữ liệu ban đầu')
