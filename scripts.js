@@ -1564,17 +1564,22 @@ document.addEventListener('DOMContentLoaded', function() {
     gasValue.innerHTML = `${formatNumber(value, 0)} <span class="text-sm font-medium">ppm</span>`;
     persistSensorState({ gas: value });
 
-    if (value >= 300) {
-      setStatus(gasStatus, 'Nguy hiểm', '#6a4b17');
+    const addGasAlert = () => {
       addSensorAlert({
         type: 'gas',
         title: 'Phát hiện khí gas',
-        location: 'Phòng bếp',
+        location: `Phòng bếp - ${formatNumber(value, 0)} ppm`,
         icon: 'fa-fire-flame-curved',
         iconClass: 'bg-mekong-brown/10 text-mekong-brown',
       });
+    };
+
+    if (value >= 300) {
+      setStatus(gasStatus, 'Nguy hiểm', '#6a4b17');
+      addGasAlert();
     } else if (value >= 200) {
       setStatus(gasStatus, 'Cần chú ý', '#6a4b17');
+      addGasAlert();
     } else {
       setStatus(gasStatus, 'An toàn');
     }
