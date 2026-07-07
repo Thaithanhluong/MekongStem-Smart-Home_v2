@@ -1545,7 +1545,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const value = parseSensorValue(message);
     if (value === null || !lightValue) return;
 
-    lightValue.innerHTML = `${formatNumber(value, 0)} <span class="text-sm font-medium">lux</span>`;
+    lightValue.innerHTML = `${formatNumber(value, 0)} <span class="text-sm font-medium">%</span>`;
     persistSensorState({ light: value });
 
     if (value < 25) {
@@ -2390,113 +2390,115 @@ document.addEventListener('DOMContentLoaded', function() {
       title: 'Hướng dẫn nhanh',
       icon: 'fa-circle-info',
       items: [
-        'Màu xanh là trạng thái đang hoạt động, màu xám là đang tắt hoặc chưa kích hoạt.',
-        'Nhấn vào nút <code>?</code> ở từng card để xem chú thích đúng với chức năng của card đó.',
-        'Các tip trong khung này được viết ngắn gọn để bạn xem nhanh ngay trên màn hình.',
+        'Dashboard điều khiển ESP32 qua MQTT tại nhóm topic <code>luong873004/feeds</code>.',
+        'Các công tắc gửi <code>1</code>/<code>0</code>; ESP32 phản hồi trạng thái qua các topic <code>V1</code> đến <code>V20</code>.',
+        'Dòng kết nối dùng <code>V20</code>: web gửi <code>ARE U HERE</code>, ESP32 trả về <code>HERE</code>.',
       ],
     },
     status: {
       title: 'Chỉ số nhanh',
       icon: 'fa-gauge-high',
       items: [
-        'Nhiệt độ, độ ẩm, ánh sáng và gas được cập nhật theo dữ liệu cảm biến.',
-        'Nếu chỉ số đổi sang màu nâu, đó là dấu hiệu cần chú ý hơn mức bình thường.',
-        'Bạn có thể xem chi tiết lịch sử ở biểu đồ phía dưới.',
+        'DHT20 gửi nhiệt độ qua <code>V4</code> và độ ẩm qua <code>V5</code> khoảng 30 giây/lần.',
+        'Cảm biến ánh sáng ở <code>A0</code> gửi <code>V6</code> theo phần trăm giá trị analog.',
+        'Cảm biến gas MQ2 ở <code>A2</code> gửi <code>V7</code> mỗi giây; ESP32 kích còi khi vượt <code>200 ppm</code>.',
       ],
     },
     'living-room': {
       title: 'Phòng khách',
       icon: 'fa-plug-circle-check',
       items: [
-        'Đèn RGB: <code>D9 - D10</code>',
-        'Khí gas: <code>A2</code>',
-        'Ánh sáng: <code>A0</code>',
-        'Còi: <code>D5 - D6</code>',
-        'Module USB: <code>D7 - D8</code>',
-        'PIR: <code>D3</code>',
-        'Quạt: <code>V9</code>, tốc độ quạt <code>V10</code>',
-        'Đèn: <code>V1</code>, màu đèn: <code>V2</code>',
+        'Đèn chính/module USB: <code>D3</code>, bật/tắt qua <code>V1</code>.',
+        'Quạt mini: <code>D4</code>, bật/tắt <code>V9</code>, tốc độ <code>V10</code>.',
+        'LED RGB: <code>D9</code>, bật/tắt <code>V3</code>, màu <code>V2</code>.',
+        'PIR phát hiện người: <code>D5</code>, gửi <code>V8</code>.',
+        'Còi: <code>D7</code>, điều khiển tay <code>V16</code>, dùng chung cho cảnh báo gas/cửa.',
+        'Servo cửa chính: <code>D2</code>, lệnh và trạng thái qua <code>V14</code>.',
+        'RFID mở cửa: bật/tắt qua <code>V15</code>; thẻ hợp lệ mở cửa 4 giây.',
+        'Gas MQ2: <code>A2</code> gửi <code>V7</code>; ánh sáng: <code>A0</code> gửi <code>V6</code>.',
+        'DHT20 gửi nhiệt độ <code>V4</code> và độ ẩm <code>V5</code>.',
+        'Tự động: <code>V12</code> bật theo ánh sáng, <code>V13</code> bật đèn khi PIR thấy người.',
       ],
     },
     light: {
       title: 'Điều khiển đèn',
       icon: 'fa-lightbulb',
       items: [
-        'Bật hoặc tắt đèn bằng công tắc chính ở giữa card.',
-        'Công tắc <code>Tự động</code> dùng để cho hệ thống tự xử lý theo ngữ cảnh.',
-        'Giữ bố cục gọn để nhìn trạng thái thật rõ trên màn hình nhỏ.',
+        'Công tắc đèn gửi <code>V1</code> để bật/tắt module USB ở chân <code>D3</code>.',
+        'Tự động bật khi trời tối gửi <code>V12</code>; ESP32 đọc <code>A0</code> mỗi 5 giây, bật dưới <code>50%</code> và tắt trên <code>70%</code>.',
+        'Nút bánh răng là hẹn giờ trên web; đến giờ, web sẽ gửi lại lệnh <code>V1</code>.',
       ],
     },
     fan: {
       title: 'Điều khiển quạt',
       icon: 'fa-fan',
       items: [
-        'Thanh trượt là nơi chỉnh tốc độ quạt theo từng nấc 10%.',
-        'Khi quạt tắt, tốc độ vẫn được lưu để bật lại là dùng tiếp.',
-        'Nếu tốc độ chưa đổi, hãy thử bật quạt trước rồi kéo thanh trượt.',
+        'Công tắc quạt gửi <code>V9</code> để bật/tắt quạt mini ở chân <code>D4</code>.',
+        'Thanh trượt gửi <code>V10</code> từ <code>0</code> đến <code>100</code>; ESP32 đổi thành PWM cho quạt.',
+        'Khi bật quạt, web gửi tốc độ hiện tại rồi gửi <code>V9=1</code> để ESP32 chạy đúng mức đã chọn.',
       ],
     },
     rgb: {
       title: 'LED RGB',
       icon: 'fa-palette',
       items: [
-        'Chọn màu trực tiếp trên lưới tổ ong bên dưới.',
-        'Ô đang chọn sẽ sáng nổi bật để bạn biết màu hiện hành.',
-        'Nút <code>?</code> này chỉ là trợ giúp, không làm đổi màu đèn.',
+        'LED RGB dùng chân <code>D9</code> và bật/tắt bằng topic <code>V3</code>.',
+        'Màu gửi qua <code>V2</code> theo mã hex, ví dụ <code>#ff0000</code>.',
+        'ESP32 chỉ đổi màu thật khi LED RGB đang bật; nếu tắt, màu mới được lưu để dùng lần bật sau.',
       ],
     },
     'main-door': {
       title: 'Cửa chính',
       icon: 'fa-door-closed',
       items: [
-        'Nhấn nút khóa/mở để đổi trạng thái cửa chính.',
-        'Biểu tượng sẽ chuyển sang mở khóa khi cửa đang mở.',
-        'Trạng thái luôn đồng bộ với dữ liệu MQTT của hệ thống.',
+        'Nút cửa gửi <code>V14</code>: <code>1</code> mở servo <code>D2</code> đến góc 100, <code>0</code> đóng về 0.',
+        'Mỗi lần đổi trạng thái, ESP32 bíp còi <code>D7</code> khoảng 100ms.',
+        'Khi RFID mở cửa tự động, ESP32 cũng cập nhật lại <code>V14</code> để card đồng bộ.',
       ],
     },
     'auto-door': {
       title: 'Chìa khóa RFID',
       icon: 'fa-door-open',
       items: [
-        'Bật để chìa khóa RFID xử lý theo logic của bộ điều khiển.',
-        'Tắt khi muốn kiểm soát thủ công.',
-        'Màu xanh là đang bật, màu xám là đang tắt.',
+        'Công tắc RFID gửi <code>V15</code> để cho phép hoặc khóa chế độ mở cửa bằng thẻ.',
+        'Khi <code>V15=1</code> và thẻ nằm trong danh sách <code>rfids_1</code>, ESP32 mở servo <code>D2</code> trong 4 giây rồi đóng.',
+        'Khi <code>V15=0</code>, ESP32 vẫn quét thẻ nhưng không tự mở cửa.',
       ],
     },
     'motion-light': {
       title: 'Tự bật đèn',
       icon: 'fa-lightbulb',
       items: [
-        'Công tắc này bật chế độ tự bật đèn chính khi PIR phát hiện người.',
-        'Đèn được điều khiển qua topic <code>V1</code>, không phải LED RGB.',
-        'Tắt công tắc này nếu chỉ muốn điều khiển đèn thủ công.',
+        'Công tắc này gửi <code>V13</code> để bật chế độ đèn theo PIR.',
+        'PIR ở chân <code>D5</code> gửi <code>V8=DETECTED</code> khi phát hiện người.',
+        'Nếu <code>V13=1</code>, ESP32 bật đèn chính <code>D3/V1</code> khi PIR thấy người; code hiện tại không tự tắt khi hết chuyển động.',
       ],
     },
     system: {
       title: 'Sơ đồ hệ thống',
       icon: 'fa-house-signal',
       items: [
-        'Khung giữa trang là minh hoạ trạng thái ngôi nhà thông minh.',
-        'Phần này giúp bạn nhìn nhanh tổng thể chứ không phải nút điều khiển.',
-        'Các đường nét màu xanh giữ đúng tông chủ đề của dashboard.',
+        'Sơ đồ chỉ để quan sát nhanh trạng thái, không phải khu vực gửi lệnh trực tiếp.',
+        'Luồng điều khiển chính là web gửi MQTT, ESP32 nhận topic rồi điều khiển chân phần cứng.',
+        'ESP32 xác nhận đang online qua topic <code>V20</code>.',
       ],
     },
     alerts: {
       title: 'Cảnh báo',
       icon: 'fa-bell',
       items: [
-        'Danh sách này gom các cảnh báo mới nhất trong hệ thống.',
-        'Khi thấy cảnh báo màu nâu, đó thường là nhóm cần chú ý hơn.',
-        'Nếu danh sách dài, hãy cuộn xuống để xem đầy đủ.',
+        'Cảnh báo được tạo từ gas <code>V7</code>, PIR <code>V8</code> và nhiệt độ <code>V4</code>.',
+        'Web hiển thị gas từ <code>200 ppm</code> là cần chú ý, từ <code>300 ppm</code> là nguy hiểm; ESP32 đã kích còi khi vượt <code>200 ppm</code>.',
+        'Cảnh báo chuyển động xuất hiện khi PIR gửi <code>DETECTED</code>; trạng thái trên web tự về bình thường sau khoảng 10 giây.',
       ],
     },
     chart: {
       title: 'Biểu đồ nhiệt độ',
       icon: 'fa-chart-line',
       items: [
-        'Chọn ngày bằng nút trước, hôm nay hoặc sau để xem dữ liệu khác nhau.',
-        'Dropdown cho phép đổi mức chi tiết: giây, phút hoặc giờ.',
-        'Điểm cuối cùng trên đường biểu đồ sẽ hiện nhãn giá trị nổi bật.',
+        'Biểu đồ dùng nhiệt độ từ DHT20 mà ESP32 gửi qua <code>V4</code>.',
+        'ESP32 cập nhật DHT20 khoảng 30 giây/lần; mỗi giá trị mới sẽ được thêm vào đường biểu đồ.',
+        'Bộ chọn giây, phút, giờ chỉ đổi cách gom dữ liệu trên web, không đổi tần suất ESP32 gửi dữ liệu.',
       ],
     },
   };
