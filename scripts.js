@@ -1389,6 +1389,7 @@ document.addEventListener('DOMContentLoaded', function() {
     rgbStatus.textContent = 'Tắt';
     rgbStatus.style.color = '#5d6775';
     rgbIcon.style.backgroundColor = '#dbe6f5';
+    rgbIcon.style.color = '#2a5ea9';
     rgbCard.style.borderBottomColor = '#dbe6f5';
     rgbCard.classList.remove('border-b-4', 'border-mekong-blue');
   };
@@ -1415,6 +1416,7 @@ document.addEventListener('DOMContentLoaded', function() {
       rgbStatus.textContent = name;
       rgbStatus.style.color = color;
       rgbIcon.style.backgroundColor = color;
+      rgbIcon.style.color = '#ffffff';
       rgbCard.style.borderBottomColor = color;
       rgbCard.classList.add('border-b-4');
       if (shouldPublish) {
@@ -1593,6 +1595,7 @@ document.addEventListener('DOMContentLoaded', function() {
       motionStatusText.innerHTML = '<span class="inline-block w-1.5 h-1.5 rounded-full mr-1" style="background-color:#6a4b17"></span> Đang phát hiện';
       motionStatusValue.style.color = '#6a4b17';
       motionStatusIcon.style.backgroundColor = '#6a4b17';
+      motionStatusIcon.style.color = '#ffffff';
       motionStatusCard.classList.add('border-b-4');
       motionStatusCard.style.borderBottomColor = '#6a4b17';
     } else {
@@ -1600,6 +1603,7 @@ document.addEventListener('DOMContentLoaded', function() {
       motionStatusText.innerHTML = '<span class="inline-block w-1.5 h-1.5 rounded-full mr-1" style="background-color:#7ca8ea"></span> Không phát hiện';
       motionStatusValue.style.color = '#0f172a';
       motionStatusIcon.style.backgroundColor = '#2a5ea9';
+      motionStatusIcon.style.color = '#ffffff';
       motionStatusCard.classList.remove('border-b-4');
       motionStatusCard.style.borderBottomColor = '#dbe6f5';
     }
@@ -1787,12 +1791,14 @@ document.addEventListener('DOMContentLoaded', function() {
       lightControlStatus.textContent = 'Bật';
       lightControlStatus.style.color = '#2a5ea9';
       lightControlIcon.style.backgroundColor = '#2a5ea9';
+      lightControlIcon.style.color = '#ffffff';
       lightControlCard.style.borderBottomColor = '#2a5ea9';
       lightControlCard.classList.add('border-b-4', 'border-mekong-blue');
     } else {
       lightControlStatus.textContent = 'Tắt';
       lightControlStatus.style.color = '#5d6775';
       lightControlIcon.style.backgroundColor = '#dbe6f5';
+      lightControlIcon.style.color = '#2a5ea9';
       lightControlCard.style.borderBottomColor = '#dbe6f5';
       lightControlCard.classList.remove('border-b-4', 'border-mekong-blue');
     }
@@ -1890,12 +1896,14 @@ document.addEventListener('DOMContentLoaded', function() {
       fanStatus.textContent = `${speed}%`;
       fanStatus.style.color = '#2a5ea9';
       fanIcon.style.backgroundColor = '#2a5ea9';
+      fanIcon.style.color = '#ffffff';
       fanCard.style.borderBottomColor = '#2a5ea9';
       fanCard.classList.add('border-b-4', 'border-mekong-blue');
     } else {
       fanStatus.textContent = 'Tắt';
       fanStatus.style.color = '#5d6775';
       fanIcon.style.backgroundColor = '#dbe6f5';
+      fanIcon.style.color = '#2a5ea9';
       fanCard.style.borderBottomColor = '#dbe6f5';
       fanCard.classList.remove('border-b-4', 'border-mekong-blue');
     }
@@ -2147,12 +2155,14 @@ document.addEventListener('DOMContentLoaded', function() {
       buzzerStatus.textContent = 'Bật';
       buzzerStatus.style.color = '#2a5ea9';
       buzzerIcon.style.backgroundColor = '#2a5ea9';
+      buzzerIcon.style.color = '#ffffff';
       buzzerCard.style.borderBottomColor = '#2a5ea9';
       buzzerCard.classList.add('border-b-4', 'border-mekong-blue');
     } else {
       buzzerStatus.textContent = 'Tắt';
       buzzerStatus.style.color = '#5d6775';
       buzzerIcon.style.backgroundColor = '#dbe6f5';
+      buzzerIcon.style.color = '#2a5ea9';
       buzzerCard.style.borderBottomColor = '#dbe6f5';
       buzzerCard.classList.remove('border-b-4', 'border-mekong-blue');
     }
@@ -2168,10 +2178,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (motionLightCard && motionLightIcon) {
       if (isOn) {
         motionLightIcon.style.backgroundColor = '#2a5ea9';
+        motionLightIcon.style.color = '#ffffff';
         motionLightCard.style.borderBottomColor = '#2a5ea9';
         motionLightCard.classList.add('border-b-4', 'border-mekong-blue');
       } else {
         motionLightIcon.style.backgroundColor = '#dbe6f5';
+        motionLightIcon.style.color = '#2a5ea9';
         motionLightCard.style.borderBottomColor = '#dbe6f5';
         motionLightCard.classList.remove('border-b-4', 'border-mekong-blue');
       }
@@ -2194,12 +2206,14 @@ document.addEventListener('DOMContentLoaded', function() {
       mainDoorStatus.style.color = '#2a5ea9';
       mainDoorIcon.innerHTML = '<i class="fa-solid fa-lock-open"></i>';
       mainDoorIcon.style.backgroundColor = '#2a5ea9';
+      mainDoorIcon.style.color = '#ffffff';
       mainDoorCard.style.borderBottomColor = '#2a5ea9';
     } else {
       mainDoorStatus.textContent = 'Đóng';
       mainDoorStatus.style.color = '#5d6775';
       mainDoorIcon.innerHTML = '<i class="fa-solid fa-lock"></i>';
       mainDoorIcon.style.backgroundColor = '#dbe6f5';
+      mainDoorIcon.style.color = '#2a5ea9';
       mainDoorCard.style.borderBottomColor = '#dbe6f5';
     }
 
@@ -2217,11 +2231,13 @@ document.addEventListener('DOMContentLoaded', function() {
       autoDoorStatus.textContent = 'Bật';
       autoDoorStatus.style.color = '#2a5ea9';
       autoDoorIcon.style.backgroundColor = '#2a5ea9';
+      autoDoorIcon.style.color = '#ffffff';
       autoDoorCard.style.borderBottomColor = '#2a5ea9';
     } else {
       autoDoorStatus.textContent = 'Tắt';
       autoDoorStatus.style.color = '#5d6775';
       autoDoorIcon.style.backgroundColor = '#dbe6f5';
+      autoDoorIcon.style.color = '#2a5ea9';
       autoDoorCard.style.borderBottomColor = '#dbe6f5';
     }
 
