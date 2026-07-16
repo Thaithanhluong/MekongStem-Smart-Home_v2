@@ -6,7 +6,7 @@ from pins import *
 from yolo_uno import *
 from mqtt_as import MQTTClient, config
 from dht20 import *
-
+from motion_kit import *
 # Mô tả hàm này...
 async def Hi_E1_BB_87u_ch_E1_BB_89nh_c_E1_BA_A3m_bi_E1_BA_BFn_gas():
   global card_ok, khi_gas, pir_motion_active, last_fan_state, Nhi_E1_BB_87t__C4_91_E1_BB_99, speed, light, AUTO_LIGHT, buzzer_when_detect, C_E1_BB_ADa, ARE_U_HERE, RFID, last_LED_state, color, gas_alarm_active, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
