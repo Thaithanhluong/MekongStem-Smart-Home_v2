@@ -165,6 +165,32 @@ async def Hi_E1_BB_83n_th_E1_BB_8B_ban__C4_91_E1_BA_A7u():
   await mqtt_client.publish(TOPIC_RFID_DOOR, RFID)
   await mqtt_client.publish(TOPIC_AUTO_LIGHT, AUTO_LIGHT)
 
+async def publish_current_state():
+  global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
+  await mqtt_client.publish(TOPIC_DEVICE, 'HERE')
+  await asleep_ms(120)
+  _C3_81nh_s_C3_A1ng = light_A0.read_analog_percent()
+  await read_dht20_safe()
+  snapshot = [
+    (TOPIC_LIGHT_SENSOR, _C3_81nh_s_C3_A1ng),
+    (TOPIC_TEMPERATURE, Nhi_E1_BB_87t__C4_91_E1_BB_99),
+    (TOPIC_HUMIDITY, _C4_90_E1_BB_99__E1_BA_A9m),
+    (TOPIC_GAS, khi_gas),
+    (TOPIC_RGB_COLOR, color),
+    (TOPIC_RGB_STATE, last_LED_state),
+    (TOPIC_FAN_STATE, last_fan_state),
+    (TOPIC_FAN_SPEED, speed),
+    (TOPIC_LIGHT_STATE, light),
+    (TOPIC_MOTION_LIGHT, auto_light_when_detect),
+    (TOPIC_MAIN_DOOR, C_E1_BB_ADa),
+    (TOPIC_RFID_DOOR, RFID),
+    (TOPIC_AUTO_LIGHT, AUTO_LIGHT),
+  ]
+  for item in snapshot:
+    if item[1] != None:
+      await mqtt_client.publish(item[0], item[1])
+      await asleep_ms(120)
+
 async def on_mqtt_msg_V_d_z_u(topic, msg):
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   AUTO_LIGHT = msg
@@ -205,6 +231,8 @@ async def on_mqtt_msg_k_x_E_F(topic, msg):
   if ARE_U_HERE == 'ARE U HERE':
     await mqtt_client.publish(TOPIC_DEVICE, 'HERE')
     print('HERE', end =' ')
+  elif ARE_U_HERE == 'SYNC_REQUEST':
+    await publish_current_state()
 
 async def on_mqtt_msg_r_E_x_W(topic, msg):
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng

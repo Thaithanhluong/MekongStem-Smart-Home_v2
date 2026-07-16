@@ -687,21 +687,20 @@ document.addEventListener('DOMContentLoaded', function() {
     autoLightStatusTopic: mqttTopic('V12'),
   };
   const dashboardStateUrl = window.__DASHBOARD_STATE_URL__ || '';
-  const espHandshakeConfig = {
-    questionMessage: 'ARE U HERE',
-    answerMessage: 'HERE',
-    firstQuestionDelayMs: 1000,
-    responseTimeoutMs: 6000,
-    retryDelayMs: 5000,
-    staleTimeoutMs: 18000,
-  };
+  const ESP_PING_MESSAGE = 'ARE U HERE';
+  const ESP_PONG_MESSAGE = 'HERE';
+  const ESP_SYNC_REQUEST_MESSAGE = 'SYNC_REQUEST';
+  const ESP_HEARTBEAT_MS = 5000;
+  const ESP_TIMEOUT_MS = 15000;
+  const MQTT_HEALTH_CHECK_MS = 3000;
+  const MQTT_SELF_ECHO_WINDOW_MS = 1200;
   let mqttClient = null;
   let isMqttConnected = false;
   let pendingMqttMessages = new Map();
-  let espQuestionTimer = null;
-  let espResponseTimer = null;
-  let espStaleTimer = null;
-  let lastEspHandshakeAt = 0;
+  let recentOwnMqttMessages = [];
+  let espConnected = false;
+  let espLastSeenAt = 0;
+  let espHeartbeatTimer = null;
   let motionResetTimer = null;
   let lastMotionAlertTime = 0;
   let lastGasAlertTime = 0;
@@ -716,95 +715,139 @@ document.addEventListener('DOMContentLoaded', function() {
     mqttConnectionStatus.style.color = color;
   };
 
-  const clearEspHandshakeTimers = () => {
-    if (espQuestionTimer) {
-      clearTimeout(espQuestionTimer);
-      espQuestionTimer = null;
-    }
-
-    if (espResponseTimer) {
-      clearTimeout(espResponseTimer);
-      espResponseTimer = null;
-    }
-
-    if (espStaleTimer) {
-      clearTimeout(espStaleTimer);
-      espStaleTimer = null;
-    }
-  };
-
-  const askEspPresence = () => {
+  const publishEspPresenceMessage = (message) => {
     if (!isMqttConnected) return;
 
-    updateMqttStatus('Đang gọi ESP32...', '#7ca8ea');
-    publishMqttMessage(mqttConfig.deviceCmdTopic, espHandshakeConfig.questionMessage, (error) => {
+    publishMqttMessage(mqttConfig.deviceCmdTopic, message, (error) => {
       if (error) {
-        updateMqttStatus('Lỗi gửi câu hỏi ESP32', '#b45309');
+        updateMqttStatus('Lỗi gửi heartbeat ESP32', '#b45309');
         console.warn('MQTT publish presence question error:', error.message);
       }
     });
-
-    if (espResponseTimer) {
-      clearTimeout(espResponseTimer);
-    }
-
-    espResponseTimer = setTimeout(() => {
-      if (isMqttConnected && !lastEspHandshakeAt) {
-        updateMqttStatus('Chưa thấy ESP32 phản hồi', '#b45309');
-      }
-
-      if (isMqttConnected) {
-        scheduleEspPresenceCheck(espHandshakeConfig.retryDelayMs, '');
-      }
-    }, espHandshakeConfig.responseTimeoutMs);
   };
 
-  const scheduleEspPresenceCheck = (delayMs = espHandshakeConfig.firstQuestionDelayMs, statusLabel = 'Broker OK, chuẩn bị gọi ESP32...') => {
-    clearEspHandshakeTimers();
-    lastEspHandshakeAt = 0;
+  const stopEspHeartbeat = () => {
+    if (!espHeartbeatTimer) return;
+    window.clearInterval(espHeartbeatTimer);
+    espHeartbeatTimer = null;
+  };
 
+  const checkEspTimeout = () => {
+    if (!isMqttConnected || !espLastSeenAt) return;
+    if (Date.now() - espLastSeenAt <= ESP_TIMEOUT_MS) return;
+
+    espConnected = false;
+    updateMqttStatus('Mất tín hiệu ESP32', '#b45309');
+  };
+
+  const sendEspHeartbeat = () => {
     if (!isMqttConnected) return;
 
-    if (statusLabel) {
-      updateMqttStatus(statusLabel, '#7ca8ea');
+    checkEspTimeout();
+    if (!espConnected) {
+      updateMqttStatus(espLastSeenAt ? 'Mất tín hiệu ESP32' : 'MQTT OK - chờ ESP32', espLastSeenAt ? '#b45309' : '#7ca8ea');
     }
 
-    espQuestionTimer = setTimeout(askEspPresence, delayMs);
+    publishEspPresenceMessage(ESP_PING_MESSAGE);
   };
 
-  const markEspConnected = () => {
-    if (espQuestionTimer) {
-      clearTimeout(espQuestionTimer);
-      espQuestionTimer = null;
-    }
+  const startEspHeartbeat = () => {
+    stopEspHeartbeat();
+    sendEspHeartbeat();
+    espHeartbeatTimer = window.setInterval(sendEspHeartbeat, ESP_HEARTBEAT_MS);
+  };
 
-    if (espResponseTimer) {
-      clearTimeout(espResponseTimer);
-      espResponseTimer = null;
-    }
-
-    if (espStaleTimer) {
-      clearTimeout(espStaleTimer);
-    }
-
-    lastEspHandshakeAt = Date.now();
+  const markEspOnline = () => {
+    espConnected = true;
+    espLastSeenAt = Date.now();
     updateMqttStatus('Đã kết nối ESP32', '#48a92a');
-
-    espStaleTimer = setTimeout(() => {
-      if (isMqttConnected && Date.now() - lastEspHandshakeAt >= espHandshakeConfig.staleTimeoutMs) {
-        updateMqttStatus('Mất tín hiệu ESP32', '#b45309');
-        scheduleEspPresenceCheck(espHandshakeConfig.firstQuestionDelayMs, '');
-      }
-    }, espHandshakeConfig.staleTimeoutMs);
   };
 
-  const handleEspStateMessage = (message) => {
+  const handleEspStateMessage = (message, options = {}) => {
     const normalizedMessage = String(message || '').trim().toUpperCase();
 
-    if (normalizedMessage === espHandshakeConfig.questionMessage) return;
-    if (normalizedMessage !== espHandshakeConfig.answerMessage && normalizedMessage !== '1') return;
+    if (normalizedMessage === ESP_PING_MESSAGE || normalizedMessage === ESP_SYNC_REQUEST_MESSAGE) return;
+    if (options.isOwnEcho) return;
+    if (normalizedMessage === ESP_PONG_MESSAGE || normalizedMessage === '1') {
+      markEspOnline();
+    }
+  };
 
-    markEspConnected();
+  const rememberOwnMqttMessage = (topic, message) => {
+    const now = Date.now();
+    recentOwnMqttMessages = recentOwnMqttMessages.filter((item) => now - item.sentAt <= MQTT_SELF_ECHO_WINDOW_MS);
+    recentOwnMqttMessages.push({
+      topic,
+      message: String(message),
+      sentAt: now,
+    });
+  };
+
+  const consumeOwnMqttEcho = (topic, message) => {
+    const now = Date.now();
+    recentOwnMqttMessages = recentOwnMqttMessages.filter((item) => now - item.sentAt <= MQTT_SELF_ECHO_WINDOW_MS);
+    const echoIndex = recentOwnMqttMessages.findIndex((item) => item.topic === topic && item.message === String(message));
+    if (echoIndex === -1) return false;
+
+    recentOwnMqttMessages.splice(echoIndex, 1);
+    return true;
+  };
+
+  const isSmartHomeResponseTopic = (topic) => getMqttSubscribeTopics().includes(topic);
+
+  const requestEspStateSync = () => {
+    publishEspPresenceMessage(ESP_SYNC_REQUEST_MESSAGE);
+  };
+
+  const flushPendingMqttMessages = () => {
+    if (!pendingMqttMessages.size) return;
+
+    const messages = Array.from(pendingMqttMessages.values());
+    pendingMqttMessages.clear();
+    messages.forEach(({ topic, message, onPublished }) => publishMqttMessage(topic, message, onPublished));
+  };
+
+  const checkMqttConnectionHealth = () => {
+    const clientIsConnected = Boolean(mqttClient?.connected);
+    const clientIsReconnecting = Boolean(mqttClient?.reconnecting);
+
+    if (!mqttClient) {
+      isMqttConnected = false;
+      espConnected = false;
+      stopEspHeartbeat();
+      updateMqttStatus('MQTT mất kết nối', '#b45309');
+      connectMqtt();
+      return;
+    }
+
+    if (!clientIsConnected) {
+      isMqttConnected = false;
+      espConnected = false;
+      stopEspHeartbeat();
+      updateMqttStatus(clientIsReconnecting ? 'Đang kết nối lại...' : 'MQTT mất kết nối', '#b45309');
+      return;
+    }
+
+    if (!isMqttConnected) {
+      isMqttConnected = true;
+      updateMqttStatus('MQTT OK - chờ ESP32', '#7ca8ea');
+      mqttClient.subscribe(getMqttSubscribeTopics(), { qos: 0 }, (error) => {
+        if (error) {
+          updateMqttStatus('Lỗi nghe topic ESP32', '#b45309');
+          console.warn('MQTT subscribe error:', error.message);
+          return;
+        }
+
+        startEspHeartbeat();
+        requestEspStateSync();
+        flushPendingMqttMessages();
+      });
+    }
+
+    checkEspTimeout();
+    if (!espConnected) {
+      updateMqttStatus(espLastSeenAt ? 'Mất tín hiệu ESP32' : 'MQTT OK - chờ ESP32', espLastSeenAt ? '#b45309' : '#7ca8ea');
+    }
   };
 
   const getMqttSubscribeTopics = () => [
@@ -913,7 +956,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     mqttClient.on('connect', () => {
       isMqttConnected = true;
-      updateMqttStatus('Broker đã kết nối', '#7ca8ea');
+      espConnected = false;
+      espLastSeenAt = 0;
+      updateMqttStatus('MQTT OK - chờ ESP32', '#7ca8ea');
       mqttClient.subscribe(getMqttSubscribeTopics(), { qos: 0 }, (error) => {
         if (error) {
           updateMqttStatus('Lỗi nghe topic ESP32', '#b45309');
@@ -921,24 +966,23 @@ document.addEventListener('DOMContentLoaded', function() {
           return;
         }
 
-        scheduleEspPresenceCheck();
+        startEspHeartbeat();
+        requestEspStateSync();
+        flushPendingMqttMessages();
       });
-      if (pendingMqttMessages.size) {
-        const messages = Array.from(pendingMqttMessages.values());
-        pendingMqttMessages.clear();
-        messages.forEach(({ topic, message, onPublished }) => publishMqttMessage(topic, message, onPublished));
-      }
     });
 
     mqttClient.on('reconnect', () => {
       isMqttConnected = false;
-      clearEspHandshakeTimers();
+      espConnected = false;
+      stopEspHeartbeat();
       updateMqttStatus('Đang kết nối lại...', '#b45309');
     });
 
     mqttClient.on('close', () => {
       isMqttConnected = false;
-      clearEspHandshakeTimers();
+      espConnected = false;
+      stopEspHeartbeat();
       updateMqttStatus('MQTT mất kết nối', '#b45309');
     });
 
@@ -949,11 +993,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     mqttClient.on('message', (topic, payload) => {
       const message = payload.toString().trim();
+      const isOwnEcho = consumeOwnMqttEcho(topic, message);
       console.info('MQTT receive:', topic, message);
 
       if (topic === mqttConfig.deviceStateTopic) {
-        handleEspStateMessage(message);
-      } else if (topic === mqttConfig.motionTopic) {
+        handleEspStateMessage(message, { isOwnEcho });
+      } else {
+        if (!isOwnEcho && isSmartHomeResponseTopic(topic)) {
+          markEspOnline();
+        }
+      }
+
+      if (topic === mqttConfig.motionTopic) {
         handleMotionMessage(message);
       } else if (topic === mqttConfig.gasTopic) {
         updateGas(message);
@@ -981,6 +1032,7 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
+    rememberOwnMqttMessage(topic, message);
     mqttClient.publish(topic, message, {
       qos: 0,
       retain: false,
@@ -2399,6 +2451,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   connectMqtt();
+  window.setInterval(checkMqttConnectionHealth, MQTT_HEALTH_CHECK_MS);
 });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -2413,7 +2466,7 @@ document.addEventListener('DOMContentLoaded', function() {
       items: [
         'Dashboard điều khiển ESP32 qua MQTT tại nhóm topic <code>luong873004/feeds</code>.',
         'Các công tắc gửi <code>1</code>/<code>0</code>; ESP32 phản hồi trạng thái qua các topic <code>V1</code> đến <code>V20</code>.',
-        'Dòng kết nối dùng <code>V20</code>: web gửi <code>ARE U HERE</code>, ESP32 trả về <code>HERE</code>.',
+        'Dashboard xác định ESP32 online khi nhận bất kỳ dữ liệu/trạng thái MQTT nào; <code>V20</code> chỉ là heartbeat phụ trợ.',
       ],
     },
     status: {
