@@ -187,12 +187,14 @@ async def on_mqtt_msg_X_v_h_D(topic, msg):
   global khi_gas, RFID, Nhi_E1_BB_87t__C4_91_E1_BB_99, last_fan_state, speed, light, AUTO_LIGHT, auto_light_when_detect, C_E1_BB_ADa, ARE_U_HERE, last_LED_state, color, _C4_90_E1_BB_99__E1_BA_A9m, _C3_81nh_s_C3_A1ng
   C_E1_BB_ADa = msg
   if C_E1_BB_ADa == '1':
-    servo_D2.servo_write(100)
+    # servo_D2.servo_write(100)
+    mk.set_servo_position(0, 100, 96)
     buzzer_D7.write_analog(round(translate(70, 0, 100, 0, 1023)))
     await asleep_ms(100)
     buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
   else:
-    servo_D2.servo_write(0)
+    # servo_D2.servo_write(0)
+    mk.set_servo_position(0, 0, 96)
     buzzer_D7.write_analog(round(translate(70, 0, 100, 0, 1023)))
     await asleep_ms(100)
     buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
@@ -280,14 +282,16 @@ async def task_on_event_u_F_P_I():
     if RFID == '1' and not rfid_card_active:
       rfid_card_active = True
       neopix.show(0, hex_to_rgb('#00ff00'))
-      servo_D2.servo_write(100)
+      # servo_D2.servo_write(100)
+      mk.set_servo_position(0, 100, 96)
       C_E1_BB_ADa = '1'
       buzzer_D7.write_analog(round(translate(70, 0, 100, 0, 1023)))
       await asleep_ms(RFID_BEEP_MS)
       buzzer_D7.write_analog(round(translate(0, 0, 100, 0, 1023)))
       await mqtt_client.publish(TOPIC_MAIN_DOOR, C_E1_BB_ADa)
       await asleep_ms(RFID_OPEN_HOLD_MS)
-      servo_D2.servo_write(0)
+      # servo_D2.servo_write(0)
+      mk.set_servo_position(0, 0, 96)
       C_E1_BB_ADa = '0'
       await mqtt_client.publish(TOPIC_MAIN_DOOR, C_E1_BB_ADa)
       neopix.show(0, hex_to_rgb('#000000'))
